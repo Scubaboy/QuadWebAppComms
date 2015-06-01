@@ -11,8 +11,8 @@ namespace QuadComms.Interfaces.Breeze
     {
         public IBreezeRepository<T> GetRepository<T>();
 
-        public Task<SaveResult> SaveChanges();
+        public bool PendingChanges();
 
-        public void CancelChanges();
+        public Task<SaveResult> SavePendingChanges();
     }
 }

@@ -16,5 +16,9 @@ namespace QuadComms.Interfaces.Breeze
         public bool Delete(T item);
 
         public bool Update(T item);
+
+        public Task<SaveResult> SaveChanges();
+
+        public void CancelChanges();
     }
 }
