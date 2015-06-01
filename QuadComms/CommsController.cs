@@ -18,10 +18,9 @@ namespace QuadComms
     public class CommsController
     {
         private ICommsChannel commChannel;
-        private ConcurrentQueue<Progress> progressReporter;
         private CancellationToken cancelToken;
 
-        public CommsController(ConcurrentQueue<Progress> progressReporter, CancellationToken cancellationToken, SupportedChannels channel)
+        public CommsController(CancellationToken cancellationToken, SupportedChannels channel)
         {
             switch (channel)
             {
@@ -40,7 +39,6 @@ namespace QuadComms
                     }
             }
 
-            this.progressReporter = progressReporter;
             this.cancelToken = cancellationToken;
 
         }
@@ -48,7 +46,7 @@ namespace QuadComms
         public async Task CommsControllerAsync()
         {
             this.commChannel.Setup();
-            await commChannel.ProcessCommsAsync(this.cancelToken,this.progressReporter);
+            await commChannel.ProcessCommsAsync(this.cancelToken);
         }
 
      //   public async Task CommsSerialReaderAsync()

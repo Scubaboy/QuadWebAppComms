@@ -13,7 +13,7 @@ namespace QuadComms.Interfaces.CommsChannel
         void AppendData(byte[] data);
         void Setup();
         SystemModes SysMode { set; }
-        Task ProcessCommsAsync(CancellationToken cancellationToken, ConcurrentQueue<Progress> progress);
+        Task ProcessCommsAsync(CancellationToken cancellationToken);
         Task ReadSerial(CancellationToken cancellationToken);
         IDataDecoder DataPckDecoder { get; set; }
     }
