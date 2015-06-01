@@ -100,6 +100,9 @@
     <Compile Include="DataPcks\SystemId\SystemId.cs" />
     <Compile Include="DataPcks\SystemStatusActDataPck\SystemStatusAct.cs" />
     <Compile Include="DataPcks\UserResponceDataPck\UserResponce.cs" />
+    <Compile Include="Interfaces\Breeze\IBreezeEntityManagerFactory.cs" />
+    <Compile Include="Interfaces\Breeze\IBreezeDataContext.cs" />
+    <Compile Include="Interfaces\Breeze\IBreezeRepository.cs" />
     <Compile Include="Interfaces\CommsChannel\ICommStatus.cs" />
     <Compile Include="Interfaces\DataDecoder\IDataDecoder.cs" />
     <Compile Include="DataPackerHelpers\ByteSwapper.cs" />
