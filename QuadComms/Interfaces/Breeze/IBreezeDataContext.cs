@@ -9,10 +9,10 @@ namespace QuadComms.Interfaces.Breeze
 {
     public interface IBreezeDataContext
     {
-        public IBreezeRepository<T> GetRepository<T>();
+        IBreezeRepository<T> GetRepository<T>() where T : class;
 
-        public bool PendingChanges();
+        bool PendingChanges();
 
-        public Task<SaveResult> SavePendingChanges();
+        Task<SaveResult> SavePendingChanges();
     }
 }

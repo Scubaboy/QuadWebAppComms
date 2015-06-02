@@ -273,7 +273,7 @@ namespace QuadComms.CommControllers
                     }
                 });
         }
-        public Task ProcessCommsAsync(CancellationToken cancellationToken, ConcurrentQueue<Progress> progress)
+        public Task ProcessCommsAsync(CancellationToken cancellationToken)
         {
             return Task.Run(() =>
                 {
@@ -295,7 +295,7 @@ namespace QuadComms.CommControllers
                                    // this.ReceiveRawDataAction();
                                     this.ReceiveDataPckAction(ref recvedDataPcks);
                                     this.TransmitAction();
-                                    this.ProgressReportAction(progress, ref recvedDataPcks, this.gotSendConf);
+                                    //this.ProgressReportAction(progress, ref recvedDataPcks, this.gotSendConf);
                                     this.gotSendConf = false;
                                     break;
                                 }

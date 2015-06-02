@@ -1,6 +1,7 @@
 ﻿using System;
-using MbedQuad;
+
 using QuadComms.DataPcks.SystemId;
+using MbedQuad;
 
 namespace QuadComms.DataPckControllers.DataPckRecvControllers.SystemIdDataPckController
 {

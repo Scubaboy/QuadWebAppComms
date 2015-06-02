@@ -9,16 +9,16 @@ namespace QuadComms.Interfaces.Breeze
 {
     public interface IBreezeRepository<T> where T : class
     {
-        public Task<IEnumerable<T>> Get();
+        Task<IEnumerable<T>> Get();
 
-        public bool Add(T item);
+        bool Add(T item);
 
-        public bool Delete(T item);
+        bool Delete(T item);
 
-        public bool Update(T item);
+        bool Update(T item);
+        
+        Task<SaveResult> SaveChanges();
 
-        public Task<SaveResult> SaveChanges();
-
-        public void CancelChanges();
+        void CancelChanges();
     }
 }

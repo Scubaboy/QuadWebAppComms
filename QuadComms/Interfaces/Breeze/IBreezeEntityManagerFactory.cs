@@ -4,6 +4,6 @@ namespace QuadComms.Interfaces.Breeze
 {
     public interface IBreezeEntityManagerFactory
     {
-        EntityManager CreateEntityManager();
+        EntityManager CreateEntityManager(string serviceName);
     }
 }
