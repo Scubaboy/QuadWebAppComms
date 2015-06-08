@@ -13,9 +13,9 @@ namespace QuadComms.Interfaces.Breeze
 
         bool Add(T item);
 
-        bool Delete(T item);
+        Task<bool> Delete(T item);
 
-        bool Update(T item);
+        Task<bool> Update(T item);
         
         Task<SaveResult> SaveChanges();
 

@@ -1,16 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO.Ports;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using MbedQuad;
+﻿using MbedQuad;
 using QuadComms.CRC32Generator;
-using QuadComms.CommsProgress;
-using QuadComms.CommsProgress.Status;
 using QuadComms.DataPckControllers.DataPckRecvControllers;
 using QuadComms.DataPckControllers.DataPckRecvControllers.DataLoggerDataPckController;
 using QuadComms.DataPckControllers.DataPckRecvControllers.DataRequestDataPckController;
@@ -19,7 +8,6 @@ using QuadComms.DataPckControllers.DataPckRecvControllers.MsgDataPckController;
 using QuadComms.DataPckControllers.DataPckRecvControllers.SystemIdDataPckController;
 using QuadComms.DataPckControllers.DataPckTransControllers.ReSendDataPckController;
 using QuadComms.DataPckDecoderControllers.DecoderTypes;
-using QuadComms.DataPckStructs;
 using QuadComms.DataPcks;
 using QuadComms.DataPcks.DataLoggerDataPck;
 using QuadComms.DataPcks.DataRequestDataPck;
@@ -27,8 +15,18 @@ using QuadComms.DataPcks.FlightDataPck;
 using QuadComms.DataPcks.MsgDataPck;
 using QuadComms.DataPcks.SendConfPck;
 using QuadComms.DataPcks.SystemId;
+using QuadComms.DataPckStructs;
 using QuadComms.Interfaces.CommsChannel;
 using QuadComms.Interfaces.DataDecoder;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO.Ports;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 
 namespace QuadComms.CommControllers
@@ -41,7 +39,7 @@ namespace QuadComms.CommControllers
     internal class CommPortController : ICommsChannel
     {
         private const string SynchString = "##";
-        private int pckCount = 0;
+
         private const int RetryThreshold = 10;
         private const int SendRecvTaskSleep =   1;
         private const int ProgressUpdatePeriod = 5;
@@ -50,7 +48,7 @@ namespace QuadComms.CommControllers
         private const int TicksBetweenSends = SendPeriod/SendRecvTaskSleep;
         private const string StartMarker = "<<";
         private const string EndMarker = ">>";
-        private bool ignoreNextDataPck = false;
+
         private Mode commsSynchMode = Mode.Synching;
 
         private SerialPort serialPort = null;
@@ -62,26 +60,25 @@ namespace QuadComms.CommControllers
         private StopBits stopBits;
         private ConcurrentQueue<byte[]> dataPckSendQueue;
         private TransmissionAction transAction;
-        private ReceivedAction receiveAction;
-        private int bytesReceived;
+
+
         private ConcurrentQueue<List<byte>> dataPckReceivedQueue;
         private ConcurrentQueue<byte[]> rawDataPckQueue; 
         private byte[] receiveBufBuildingPck;
         private byte[] dataPckSent;
         private List<byte> rawDataPack;
-        private bool gotSendConf;
-        private bool gotfirstPck;
+
         private int pckRecvTimer;
         private DataPckTypes.DataPcks lastMsgReceived;
-        private SendConf sendConf;
+
         private IDataDecoder dataPckDecoder;
-        private int retryCount;
-        private int progressTicks;
+
+
         private int sendTicks;
         private int failedSendsLastProgress;
-        private int failedRecvLastProgress;
+
         private SystemModes mode;
-        private byte[] rawData;
+
         private readonly List<SystemModes> ReSendModes = new List<SystemModes>()
             {
                 SystemModes.ConfigCal,
@@ -102,9 +99,7 @@ namespace QuadComms.CommControllers
             this.parity = parity;
             this.stopBits = stopBits;
             this.handshake = handshake;
-            this.gotSendConf = false;
             this.lastMsgReceived = DataPckTypes.DataPcks.NoMsg;
-            this.gotfirstPck = false;
             this.pckRecvTimer = 0;
         }
 
@@ -124,14 +119,8 @@ namespace QuadComms.CommControllers
             this.dataPckReceivedQueue = new ConcurrentQueue<List<byte>>();
             this.receiveBufBuildingPck = new byte[DataPckTypes.DataPckSendRecvSize];
             this.rawDataPckQueue = new ConcurrentQueue<byte[]>();
-            this.rawData = null;
-            this.receiveAction = ReceivedAction.Waiting;
             this.transAction = TransmissionAction.WaitingDataPckSend;
-            this.bytesReceived = 0;
-            this.retryCount = 0;
-            this.progressTicks = 0;
             this.sendTicks = 0;
-            this.failedRecvLastProgress = 0;
             this.failedSendsLastProgress = 0;
             this.rawDataPack  = new List<byte>();
             this.serialPort = new SerialPort(this.portName,this.baudRate,this.parity,this.dataBits,this.stopBits);
@@ -140,13 +129,12 @@ namespace QuadComms.CommControllers
             this.serialPort.ReadBufferSize = 4096;
             this.serialPort.WriteBufferSize = 1024;
             this.serialPort.Open();
-            //this.serialPort.DataReceived += serialPort_DataReceived;
             this.serialPort.DiscardInBuffer();
             this.serialPort.DiscardOutBuffer();
             
         }
 
-        private void serialPort_DataReceived()//object sender, SerialDataReceivedEventArgs e)
+        private void serialPort_DataReceived()
         {
             switch (this.commsSynchMode)
             {
@@ -167,82 +155,76 @@ namespace QuadComms.CommControllers
                             }
                             catch (Exception)
                             {
-                                
-                               
+
+
                             }
                         }
-                        
+
                         break;
                     }
-                    case Mode.Syched:
+                case Mode.Syched:
                     {
-                                if (this.pckRecvTimer > 300)
+                        if (this.pckRecvTimer > 300)
+                        {
+                            Debug.WriteLine("timeout {0}", this.pckRecvTimer);
+                            this.serialPort.DiscardInBuffer();
+                        }
+
+                        if (this.serialPort.BytesToRead == 200)
+                        {
+                            var rawDataRcv = new byte[200];
+
+                            this.serialPort.Read(rawDataRcv, 0, rawDataRcv.Length);
+
+                            if (rawDataRcv[0] == 60 && rawDataRcv[1] == 60 && rawDataRcv[198] == 62 && rawDataRcv[199] == 62)
+                            {
+
+                                Task.Factory.StartNew(() =>
                                 {
-                                    Debug.WriteLine("timeout {0}",this.pckRecvTimer);
+                                    this.dataPckReceivedQueue.Enqueue(rawDataRcv.ToList());
+                                    Debug.WriteLine("Recv msg tyep {0}", BitConverter.ToUInt32(rawDataRcv, 6));
+                                    Debug.WriteLine("timeout {0}", this.pckRecvTimer);
+                                });
+                            }
+                            else
+                            {
+                                try
+                                {
                                     this.serialPort.DiscardInBuffer();
                                 }
-
-                                if (this.serialPort.BytesToRead == 200)
+                                catch (Exception)
                                 {
-                                    var rawDataRcv = new byte[200];
-
-                                    this.serialPort.Read(rawDataRcv, 0, rawDataRcv.Length);
-
-                                    if (rawDataRcv[0] == 60 && rawDataRcv[1] == 60 && rawDataRcv[198] == 62 && rawDataRcv[199] == 62)
-                                    {
-
-                                        Task.Factory.StartNew(() =>
-                                        {
-                                            this.dataPckReceivedQueue.Enqueue(rawDataRcv.ToList());
-                                            Debug.WriteLine("Recv msg tyep {0}", BitConverter.ToUInt32(rawDataRcv, 6));
-                                            Debug.WriteLine("timeout {0}", this.pckRecvTimer);
-                                        });
-
-                                        //this.serialPort.DiscardInBuffer();
-                                    }
-                                    else
-                                    {
-                                        try
-                                        {
-                                            this.serialPort.DiscardInBuffer();
-                                        }
-                                        catch (Exception)
-                                        {
 
 
-                                        }
-
-                                    }
                                 }
-                                else if (this.serialPort.BytesToRead == 0)
-                                {
-                                    this.pckRecvTimer = 0;
-                                }
-                                else if (this.serialPort.BytesToRead > 200)
-                                {
-                                    try
-                                    {
-                                        var rawDataRcv = new byte[this.serialPort.BytesToRead];
 
-                                        this.serialPort.Read(rawDataRcv, 0, rawDataRcv.Length);
-                                        this.serialPort.DiscardInBuffer();
-                                    }
-                                    catch (Exception)
-                                    {
+                            }
+                        }
+                        else if (this.serialPort.BytesToRead == 0)
+                        {
+                            this.pckRecvTimer = 0;
+                        }
+                        else if (this.serialPort.BytesToRead > 200)
+                        {
+                            try
+                            {
+                                var rawDataRcv = new byte[this.serialPort.BytesToRead];
+
+                                this.serialPort.Read(rawDataRcv, 0, rawDataRcv.Length);
+                                this.serialPort.DiscardInBuffer();
+                            }
+                            catch (Exception)
+                            {
 
 
-                                    }
+                            }
 
-                                    Debug.WriteLine("Lost buffer timing");
-                                }
-                                else
-                                {
-                                    this.pckRecvTimer++;
-                                }
-                           // }
-                      //  }
-                         
-                     
+                            Debug.WriteLine("Lost buffer timing");
+                        }
+                        else
+                        {
+                            this.pckRecvTimer++;
+                        }
                         break;
                     }
             }
@@ -263,7 +245,7 @@ namespace QuadComms.CommControllers
             }
         }
 
-        public Task ReadSerial(CancellationToken cancellationToken)
+       /* public Task ReadSerial(CancellationToken cancellationToken)
         {
             return Task.Factory.StartNew(() =>
                 {
@@ -272,7 +254,8 @@ namespace QuadComms.CommControllers
                         this.serialPort_DataReceived();
                     }
                 });
-        }
+        }*/
+
         public Task ProcessCommsAsync(CancellationToken cancellationToken)
         {
             return Task.Run(() =>
@@ -285,18 +268,10 @@ namespace QuadComms.CommControllers
 
                         switch (commsSynchMode)
                         {
-                            case Mode.Synching:
+                            case Mode.Syched:
                                 {
-
-                                    break;
-                                }
-                                case Mode.Syched:
-                                {
-                                   // this.ReceiveRawDataAction();
-                                    this.ReceiveDataPckAction(ref recvedDataPcks);
+                                    this.ReceiveDataPckAction();
                                     this.TransmitAction();
-                                    //this.ProgressReportAction(progress, ref recvedDataPcks, this.gotSendConf);
-                                    this.gotSendConf = false;
                                     break;
                                 }
                         }
@@ -308,18 +283,18 @@ namespace QuadComms.CommControllers
                 });
         }
 
-        private void ProgressReportAction(ConcurrentQueue<Progress> progress, ref  List<DataPckRecvController> recvedDataPcks,bool msgSendConf)
-        {
-            progress.Enqueue(
-                new Progress(
-                    recvedDataPcks,
-                    new SendReceiveStatus(
-                        this.failedSendsLastProgress,
-                        this.failedRecvLastProgress), msgSendConf));
+      //  private void ProgressReportAction(ref  List<DataPckRecvController> recvedDataPcks,bool msgSendConf)
+      //  {
+     //       progress.Enqueue(
+     //           new Progress(
+     //               recvedDataPcks,
+     //               new SendReceiveStatus(
+     //                   this.failedSendsLastProgress,
+     //                   this.failedRecvLastProgress), msgSendConf));
 
-                recvedDataPcks = new List<DataPckRecvController>();
-                this.progressTicks = 0;
-        }
+     //           recvedDataPcks = new List<DataPckRecvController>();
+     //           this.progressTicks = 0;
+     //   }
 
         /*private void ReceiveRawDataAction()
         {
@@ -453,7 +428,7 @@ namespace QuadComms.CommControllers
         }
         */
 
-        private void ReceiveDataPckAction(ref List<DataPckRecvController> recvedDataPcks)
+        private void ReceiveDataPckAction()
         {
             if (this.dataPckReceivedQueue.Any())
             {
@@ -463,7 +438,7 @@ namespace QuadComms.CommControllers
                 {
                     DecodedDataPck decodedDataPck;
                     this.DataPckDecoder.Decode(dataPckRecvRaw.ToArray(), out decodedDataPck);
-                    this.BuildDataPck(ref recvedDataPcks, decodedDataPck);
+                    this.BuildDataPck(decodedDataPck);
                 }
             }
         }
@@ -502,7 +477,7 @@ namespace QuadComms.CommControllers
             }
         }
 
-        private void BuildDataPck(ref List<DataPckRecvController> recvedDataPcks, DecodedDataPck dataPck)
+        private void BuildDataPck(DecodedDataPck dataPck)
         {
             if (dataPck.DataPck != null && dataPck.Status == DecodeStatus.Complete)
             {
@@ -517,7 +492,7 @@ namespace QuadComms.CommControllers
                         }.GetByteArray());
 
                     this.lastMsgReceived = DataPckTypes.DataPcks.NoMsg;
-                    this.ignoreNextDataPck = true;
+                   // this.ignoreNextDataPck = true;
                 }
                 else
                 {  
@@ -531,8 +506,6 @@ namespace QuadComms.CommControllers
                                     this.transAction = TransmissionAction.WaitingDataPckSend;
                                     
                                 }
-                                this.gotSendConf = true;
-                               // this.lastMsgReceived = DataPckTypes.DataPcks.NoMsg;
                                 break;
                             }
                         case DataPckTypes.DataPcks.FlightData:

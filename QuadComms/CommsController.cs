@@ -49,26 +49,28 @@ namespace QuadComms
             await commChannel.ProcessCommsAsync(this.cancelToken);
         }
 
+        //COuld use signalr for message trans and mode changes.
+
      //   public async Task CommsSerialReaderAsync()
       //  {
       //      this.commChannel.Setup();
       //      await commChannel.ReadSerial(this.cancelToken);
       //  }
-        public void AddDataPckToSendQueue(byte[] dataPck)
-        {
-            this.commChannel.AppendData(dataPck);
-        }
+      //  public void AddDataPckToSendQueue(byte[] dataPck)
+      //  {
+     //       this.commChannel.AppendData(dataPck);
+     //   }
 
-        public SystemModes Mode
-        {
-            set
-            {
-                if (this.commChannel != null)
-                {
-                    this.commChannel.SysMode = value;
-                }
-            }
-        }
+      //  public SystemModes Mode
+     //   {
+      //      set
+      //      {
+      //          if (this.commChannel != null)
+      //          {
+      //              this.commChannel.SysMode = value;
+      //          }
+      //      }
+     //   }
 
    
     }

@@ -39,6 +39,9 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Client">
+      <HintPath>packages\Microsoft.AspNet.SignalR.Client.2.2.0\lib\net45\Microsoft.AspNet.SignalR.Client.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Data.Edm, Version=5.6.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>packages\Microsoft.Data.Edm.5.6.3\lib\net40\Microsoft.Data.Edm.dll</HintPath>
@@ -54,6 +57,9 @@
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog">
+      <HintPath>packages\NLog.3.2.1\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="QuadEFModels">
       <HintPath>packages\QuadEFModels.1.0.0-CI00003\lib\net40\QuadEFModels.dll</HintPath>
@@ -119,7 +125,7 @@
     <Compile Include="Interfaces\Breeze\IBreezeEntityManagerFactory.cs" />
     <Compile Include="Interfaces\Breeze\IBreezeDataContext.cs" />
     <Compile Include="Interfaces\Breeze\IBreezeRepository.cs" />
-    <Compile Include="Interfaces\Breeze\Repositories\ActiveQuadRepository\ActiveQuadRepos.cs" />
+    <Compile Include="Breeze\Repositories\ActiveQuadRepository\ActiveQuadRepos.cs" />
     <Compile Include="Interfaces\CommsChannel\ICommStatus.cs" />
     <Compile Include="Interfaces\DataDecoder\IDataDecoder.cs" />
     <Compile Include="DataPackerHelpers\ByteSwapper.cs" />
@@ -131,16 +137,22 @@
     <Compile Include="Interfaces\CommsChannel\ICommsChannel.cs" />
     <Compile Include="Interfaces\CRCInterface\ICRC.cs" />
     <Compile Include="Interfaces\DataPckTransControllerInterface\IDataPckTransController.cs" />
+    <Compile Include="Interfaces\SignalR\ISignalRClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SignalR\MessageHub\MessageHugClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="DataPckControllers\DataPcks.cd" />
+    <Content Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="NLog.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Breeze\NewFolder1\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="MbedQuad\MbedQuad.csproj">
       <Project>{17bdc655-a90f-47ee-a410-12a654407e1e}</Project>

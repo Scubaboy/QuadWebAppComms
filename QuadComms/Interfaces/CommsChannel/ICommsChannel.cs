@@ -14,7 +14,7 @@ namespace QuadComms.Interfaces.CommsChannel
         void Setup();
         SystemModes SysMode { set; }
         Task ProcessCommsAsync(CancellationToken cancellationToken);
-        Task ReadSerial(CancellationToken cancellationToken);
+        //Task ReadSerial(CancellationToken cancellationToken);
         IDataDecoder DataPckDecoder { get; set; }
     }
 }
