@@ -18,6 +18,7 @@ using QuadComms.DataPcks.SystemId;
 using QuadComms.DataPckStructs;
 using QuadComms.Interfaces.CommsChannel;
 using QuadComms.Interfaces.DataDecoder;
+using QuadComms.Interfaces.Queues;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -48,84 +49,41 @@ namespace QuadComms.CommControllers
         private const int TicksBetweenSends = SendPeriod/SendRecvTaskSleep;
         private const string StartMarker = "<<";
         private const string EndMarker = ">>";
-
         private Mode commsSynchMode = Mode.Synching;
-
         private SerialPort serialPort = null;
-        private string portName;
-        private int baudRate;
-        private int dataBits;
-        private Handshake handshake;
-        private Parity parity;
-        private StopBits stopBits;
-        private ConcurrentQueue<byte[]> dataPckSendQueue;
+        private CommPortConfig commPortConfig;
         private TransmissionAction transAction;
-
-
-        private ConcurrentQueue<List<byte>> dataPckReceivedQueue;
-        private ConcurrentQueue<byte[]> rawDataPckQueue; 
         private byte[] receiveBufBuildingPck;
-        private byte[] dataPckSent;
-        private List<byte> rawDataPack;
-
-        private int pckRecvTimer;
-        private DataPckTypes.DataPcks lastMsgReceived;
-
+        private IPostQueueMsg dataPckSent;
         private IDataDecoder dataPckDecoder;
-
-
+        private List<byte> rawDataPack;
+        ConcurrentQueue<byte[]> recvQueue;
+        ConcurrentQueue<IPostQueueMsg> postQueue;
+        private int pckRecvTimer;
         private int sendTicks;
         private int failedSendsLastProgress;
 
-        private SystemModes mode;
 
-        private readonly List<SystemModes> ReSendModes = new List<SystemModes>()
-            {
-                SystemModes.ConfigCal,
-                SystemModes.ArmMotors
-            }; 
 
-        public CommPortController(
-            string portname,
-            int baud,
-            Parity parity,
-            StopBits stopBits,
-            Handshake handshake,
-            int dataBit)
+        public CommPortController(IDataDecoder dataPckDecoder, CommPortConfig commPortConfig, ConcurrentQueue<byte[]> recvQueue, ConcurrentQueue<IPostQueueMsg> postQueue)
         {
-            this.portName = portname;
-            this.baudRate = baud;
-            this.dataBits = dataBit;
-            this.parity = parity;
-            this.stopBits = stopBits;
-            this.handshake = handshake;
-            this.lastMsgReceived = DataPckTypes.DataPcks.NoMsg;
+            this.dataPckDecoder = dataPckDecoder;
+            this.commPortConfig = commPortConfig;
+            this.recvQueue = recvQueue;
+            this.postQueue = postQueue;
             this.pckRecvTimer = 0;
-        }
-
-        public void AppendData(byte[] data)
-        {
-            if (this.dataPckSendQueue == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            this.dataPckSendQueue.Enqueue(data);
         }
 
         public void Setup()
         {
-            this.dataPckSendQueue = new ConcurrentQueue<byte[]>();
-            this.dataPckReceivedQueue = new ConcurrentQueue<List<byte>>();
             this.receiveBufBuildingPck = new byte[DataPckTypes.DataPckSendRecvSize];
-            this.rawDataPckQueue = new ConcurrentQueue<byte[]>();
             this.transAction = TransmissionAction.WaitingDataPckSend;
             this.sendTicks = 0;
             this.failedSendsLastProgress = 0;
             this.rawDataPack  = new List<byte>();
-            this.serialPort = new SerialPort(this.portName,this.baudRate,this.parity,this.dataBits,this.stopBits);
+            this.serialPort = new SerialPort(this.commPortConfig.PortName, this.commPortConfig.Baud, this.commPortConfig.Parity, this.commPortConfig.DataBits, this.commPortConfig.Stopbits);
             this.serialPort.Close();
-            this.serialPort.Handshake = this.handshake;
+            this.serialPort.Handshake = this.commPortConfig.Handshake;
             this.serialPort.ReadBufferSize = 4096;
             this.serialPort.WriteBufferSize = 1024;
             this.serialPort.Open();
@@ -178,10 +136,9 @@ namespace QuadComms.CommControllers
 
                             if (rawDataRcv[0] == 60 && rawDataRcv[1] == 60 && rawDataRcv[198] == 62 && rawDataRcv[199] == 62)
                             {
-
                                 Task.Factory.StartNew(() =>
                                 {
-                                    this.dataPckReceivedQueue.Enqueue(rawDataRcv.ToList());
+                                    this.recvQueue.Enqueue(rawDataRcv);
                                     Debug.WriteLine("Recv msg tyep {0}", BitConverter.ToUInt32(rawDataRcv, 6));
                                     Debug.WriteLine("timeout {0}", this.pckRecvTimer);
                                 });
@@ -245,23 +202,10 @@ namespace QuadComms.CommControllers
             }
         }
 
-       /* public Task ReadSerial(CancellationToken cancellationToken)
-        {
-            return Task.Factory.StartNew(() =>
-                {
-                    while (!cancellationToken.IsCancellationRequested)
-                    {
-                        this.serialPort_DataReceived();
-                    }
-                });
-        }*/
-
-        public Task ProcessCommsAsync(CancellationToken cancellationToken)
+        public Task Start(CancellationToken cancellationToken)
         {
             return Task.Run(() =>
                 {
-                    var recvedDataPcks = new List<DataPckRecvController>();
-
                     while (!cancellationToken.IsCancellationRequested)
                     {
                         this.serialPort_DataReceived();
@@ -270,7 +214,6 @@ namespace QuadComms.CommControllers
                         {
                             case Mode.Syched:
                                 {
-                                    this.ReceiveDataPckAction();
                                     this.TransmitAction();
                                     break;
                                 }
@@ -283,152 +226,7 @@ namespace QuadComms.CommControllers
                 });
         }
 
-      //  private void ProgressReportAction(ref  List<DataPckRecvController> recvedDataPcks,bool msgSendConf)
-      //  {
-     //       progress.Enqueue(
-     //           new Progress(
-     //               recvedDataPcks,
-     //               new SendReceiveStatus(
-     //                   this.failedSendsLastProgress,
-     //                   this.failedRecvLastProgress), msgSendConf));
-
-     //           recvedDataPcks = new List<DataPckRecvController>();
-     //           this.progressTicks = 0;
-     //   }
-
-        /*private void ReceiveRawDataAction()
-        {
-            //Process any remaing data from last run
-            if (this.rawData != null)
-            {
-                this.CopyRawdata(ref rawData, ref this.rawDataPack);
-            }
-
-            //If new data in the queue extract a packet and start decoding.
-            if (this.rawDataPckQueue.Any())
-            {
-                if (this.rawDataPckQueue.TryDequeue(out rawData))
-                {
-                    this.CopyRawdata(ref rawData, ref this.rawDataPack);
-                }
-            }
-        }
-
-        private void CopyRawdata(ref byte[] rawInputData,ref List<byte> rawDataPck)
-        {
-            if (!rawDataPck.Any())
-            {
-                var startMarkerIndex = this.FindIndexOfMarker(rawInputData, StartMarker, 0);
-                var endMarkerIndex = this.FindIndexOfMarker(rawInputData, EndMarker, startMarkerIndex > -1 ? startMarkerIndex + 2 : 0);
-
-                if (startMarkerIndex != -1 && (endMarkerIndex != -1 && endMarkerIndex > startMarkerIndex))
-                {
-                    for (var iter = startMarkerIndex; iter <= endMarkerIndex+1; iter++)
-                    {
-                        rawDataPck.Add(rawInputData[iter]);
-                    }
-
-                    if (rawDataPck.Count == 200)
-                    {
-                        this.dataPckReceivedQueue.Enqueue(rawDataPck);
-                    }
-
-                    rawDataPck = new List<byte>();
-
-                    var remainingData = rawInputData.Length - 200;
-
-                    if (remainingData > 0)
-                    {
-                        var rawInputDataTemp = new byte[remainingData];
-                        for (var iter = 200; iter < rawInputData.Length; iter++)
-                        {
-                            rawInputDataTemp[iter - 200] = rawInputData[iter];
-                        }
-
-                        rawInputData = rawInputDataTemp;
-                    }
-                    else
-                    {
-                        rawInputData = null;
-                    }
-                }
-                else if (startMarkerIndex != -1 && endMarkerIndex == -1)
-                {
-                    for (var iter = startMarkerIndex; iter < rawInputData.Length; iter++)
-                    {
-                        rawDataPck.Add(rawInputData[iter]);
-                    }
-
-                    rawInputData = null;
-                }
-                else
-                {
-                    rawInputData = null;
-                }
-            }
-            else
-            {
-                var rawDataPckToString = System.Text.Encoding.ASCII.GetString(rawDataPck.ToArray());
-
-                if (rawDataPckToString.Contains(StartMarker))
-                {
-                    var endMarkerIndex = this.FindIndexOfMarker(rawInputData,  EndMarker,0);
-
-                    if (endMarkerIndex != -1)
-                    {
-                        for (var iter = 0; iter <= endMarkerIndex + 1; iter++)
-                        {
-                            rawDataPck.Add(rawInputData[iter]);
-                        }
-
-                        if (rawDataPck.Count == 200)
-                        {
-                            this.dataPckReceivedQueue.Enqueue(rawDataPck);
-                        }
-
-                        rawDataPck = new List<byte>();
-
-                        var remainingData = rawInputData.Length - (endMarkerIndex + 1);// -2 - endMarkerIndex;
-
-                        if (remainingData > 0)
-                        {
-                            var rawInputDataTemp = new byte[remainingData];
-
-                            for (var iter = endMarkerIndex + 1; iter <= remainingData; iter++)
-                            {
-                                rawInputDataTemp[iter - (endMarkerIndex + 1)] = rawInputData[iter];
-                            }
-
-                            rawInputData = rawInputDataTemp;
-                        }
-                        else
-                        {
-                            rawInputData = null;
-                        }
-                    }
-                    else
-                    {
-                        rawDataPck.AddRange(rawInputData);
-                        rawInputData = null;
-                    }
-                }
-                else
-                {
-                    rawDataPck.Clear();
-                    rawInputData = null;
-                }
-            }
-        }
-        
-        private int FindIndexOfMarker(byte[] rawData, string marker, int offset)
-        {
-            var rawDataAsString = Encoding.ASCII.GetString(rawData);
-
-            return rawDataAsString.IndexOf(marker,offset);
-        }
-        */
-
-        private void ReceiveDataPckAction()
+        /*private void ReceiveDataPckAction()
         {
             if (this.dataPckReceivedQueue.Any())
             {
@@ -441,7 +239,7 @@ namespace QuadComms.CommControllers
                     this.BuildDataPck(decodedDataPck);
                 }
             }
-        }
+        }*/
 
         private void TransmitAction()
         {
@@ -452,17 +250,25 @@ namespace QuadComms.CommControllers
                     case TransmissionAction.WaitingAck:
                         {
                             this.failedSendsLastProgress++;
-                            this.SendDataPck(dataPckSent);
+                            this.SendDataPck(dataPckSent.Data);
                             break;
                         }
                     case TransmissionAction.WaitingDataPckSend:
                         {
-                            if (this.dataPckSendQueue.Any())
+                            if (this.postQueue.Any())
                             {
-                                if (this.dataPckSendQueue.TryDequeue(out dataPckSent))
+                                if (this.postQueue.TryDequeue(out dataPckSent))
                                 {
-                                    this.transAction = TransmissionAction.WaitingAck;
-                                    this.SendDataPck(dataPckSent);  
+                                    if (dataPckSent.Ackrequired)
+                                    {
+                                       this.transAction = TransmissionAction.WaitingAck;
+                                    }
+                                    else
+                                    {
+                                        this.transAction = TransmissionAction.WaitingDataPckSend;
+                                    }
+
+                                    this.SendDataPck(dataPckSent.Data);  
                                 }
                             }
                             break;
@@ -477,7 +283,14 @@ namespace QuadComms.CommControllers
             }
         }
 
-        private void BuildDataPck(DecodedDataPck dataPck)
+        private void ProcessNewDataPck(DecodedDataPck dataPck)
+        {
+            if (dataPck.DataPck != null && dataPck.Status == DecodeStatus.Complete)
+            {
+
+            }
+        }
+       /* private void BuildDataPck(DecodedDataPck dataPck)
         {
             if (dataPck.DataPck != null && dataPck.Status == DecodeStatus.Complete)
             {
@@ -581,8 +394,8 @@ namespace QuadComms.CommControllers
 
                 
             }
-        }
-
+        }*/
+        /*
         private void SetLastMsgReceived(DataPck dataPcks)
         {
            if (dataPcks.Type != DataPckTypes.DataPcks.SendConf & dataPcks.Type != DataPckTypes.DataPcks.FreeTxtMsg)
@@ -590,7 +403,7 @@ namespace QuadComms.CommControllers
                this.lastMsgReceived = dataPcks.Type;
            }
         }
-
+        */
         private void SendDataPck(byte[] dataPckToSend)
         {
             var blocksSent = 0;
@@ -609,7 +422,7 @@ namespace QuadComms.CommControllers
             } 
         }
 
-
+       /*
         public IDataDecoder DataPckDecoder
         {
             get
@@ -639,6 +452,6 @@ namespace QuadComms.CommControllers
             {
                this.mode = value;
             }
-        }
+        }*/
     }
 }

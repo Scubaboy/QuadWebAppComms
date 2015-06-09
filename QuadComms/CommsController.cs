@@ -26,10 +26,10 @@ namespace QuadComms
             {
                 case SupportedChannels.Comm:
                     {
-                        commChannel = new CommPortController("com5", 9600, Parity.None, StopBits.One, Handshake.None,8);
-                        var decoder = new BinaryDecoder();
-                        decoder.CrcController = new CRC32();
-                        commChannel.DataPckDecoder = decoder;
+                       // commChannel = new CommPortController("com5", 9600, Parity.None, StopBits.One, Handshake.None,8);
+                      //  var decoder = new BinaryDecoder();
+                      //  decoder.CrcController = new CRC32();
+                       // commChannel.DataPckDecoder = decoder;
                         break;
                     }
                     case SupportedChannels.Tcpip:
@@ -46,7 +46,7 @@ namespace QuadComms
         public async Task CommsControllerAsync()
         {
             this.commChannel.Setup();
-            await commChannel.ProcessCommsAsync(this.cancelToken);
+            await commChannel.Start(this.cancelToken);
         }
 
         //COuld use signalr for message trans and mode changes.

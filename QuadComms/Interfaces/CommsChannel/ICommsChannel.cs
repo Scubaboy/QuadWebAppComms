@@ -10,11 +10,11 @@ namespace QuadComms.Interfaces.CommsChannel
 {
     internal interface ICommsChannel
     {
-        void AppendData(byte[] data);
+       // void AppendData(byte[] data);
         void Setup();
-        SystemModes SysMode { set; }
-        Task ProcessCommsAsync(CancellationToken cancellationToken);
+        //SystemModes SysMode { set; }
+        Task Start(CancellationToken cancellationToken);
         //Task ReadSerial(CancellationToken cancellationToken);
-        IDataDecoder DataPckDecoder { get; set; }
+        //IDataDecoder DataPckDecoder { get; set; }
     }
 }
