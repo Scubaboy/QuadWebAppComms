@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace QuadComms.Interfaces.Queues
 {
-    public interface IPostQueueMsg
+    public interface ISignalRRecvQueueMsg
     {
-        bool Ackrequired { get; }
-        byte[] Data { get; }
     }
 }

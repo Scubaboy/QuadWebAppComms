@@ -17,11 +17,13 @@ namespace QuadComms.DataPckDecoderControllers.DecoderTypes
     {
         private readonly DecodeStatus status;
         private readonly DataPck decodedDataPck;
+        private readonly UInt32 dataPckCrc;
 
-        internal DecodedDataPck(DecodeStatus status, DataPck decodedDataPck)
+        internal DecodedDataPck(UInt32 dataPckCrc, DecodeStatus status, DataPck decodedDataPck)
         {
             this.status = status;
             this.decodedDataPck = decodedDataPck;
+            this.dataPckCrc = dataPckCrc;
         }
 
         public DecodeStatus Status
@@ -32,6 +34,14 @@ namespace QuadComms.DataPckDecoderControllers.DecoderTypes
         public DataPck DataPck
         {
             get { return this.decodedDataPck; }
+        }
+
+        public UInt32 DataPckCrc
+        {
+            get
+            {
+                return this.dataPckCrc;
+            }
         }
     }
 }

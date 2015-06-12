@@ -39,12 +39,14 @@ namespace QuadComms.DataPckDecoderControllers.Binary
         public void Decode(byte[] dataPck, out DecodedDataPck decodedDataPck)
         {
             var status = DecodeStatus.FailedCrcCheck;
+            UInt32 readCrc = 0;
+
             DataPck pck = null;
 
             if (this.crcController != null)
             {
                 //Extract CRC
-                var readCrc = BitConverter.ToUInt32(dataPck, 2);
+                readCrc = BitConverter.ToUInt32(dataPck, 2);
                 var computedCrc = this.crcController.CalculateCrc(
                     new ArraySegment<byte>(dataPck, 6, DataPckTypes.DataPckDataSize));
 
@@ -60,7 +62,7 @@ namespace QuadComms.DataPckDecoderControllers.Binary
                 throw new ArgumentNullException();
             }
 
-            decodedDataPck = new DecodedDataPck(status, pck);
+            decodedDataPck = new DecodedDataPck(readCrc, status, pck);
         }
     }
 }

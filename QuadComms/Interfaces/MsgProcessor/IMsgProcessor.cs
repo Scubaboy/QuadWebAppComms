@@ -8,7 +8,7 @@ namespace QuadComms.Interfaces.MsgProcessor
 {
     public interface IMsgProcessor
     {
-        Task<bool> Start();
+        Task Start();
         void Stop();
     }
 }

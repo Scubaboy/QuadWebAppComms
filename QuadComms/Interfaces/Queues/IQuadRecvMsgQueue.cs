@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QuadComms.DataPcks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace QuadComms.Interfaces.Queues
 {
-    public interface IPostQueueMsg
+    public interface IQuadRecvMsgQueue
     {
-        bool Ackrequired { get; }
-        byte[] Data { get; }
+        DataPck Msg { get;  }
+        UInt32 CRC { get; }
     }
 }

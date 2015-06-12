@@ -19,6 +19,7 @@ using QuadComms.DataPckStructs;
 using QuadComms.Interfaces.CommsChannel;
 using QuadComms.Interfaces.DataDecoder;
 using QuadComms.Interfaces.Queues;
+using QuadComms.QueuePackets.QuadRecv;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -57,15 +58,16 @@ namespace QuadComms.CommControllers
         private IPostQueueMsg dataPckSent;
         private IDataDecoder dataPckDecoder;
         private List<byte> rawDataPack;
-        ConcurrentQueue<byte[]> recvQueue;
+        ConcurrentQueue<IQuadRecvMsgQueue> recvQueue;
         ConcurrentQueue<IPostQueueMsg> postQueue;
+        private ConcurrentQueue<byte[]> dataPckReceivedQueue = new ConcurrentQueue<byte[]>();
         private int pckRecvTimer;
         private int sendTicks;
         private int failedSendsLastProgress;
 
 
 
-        public CommPortController(IDataDecoder dataPckDecoder, CommPortConfig commPortConfig, ConcurrentQueue<byte[]> recvQueue, ConcurrentQueue<IPostQueueMsg> postQueue)
+        public CommPortController(IDataDecoder dataPckDecoder, CommPortConfig commPortConfig, ConcurrentQueue<IQuadRecvMsgQueue> recvQueue, ConcurrentQueue<IPostQueueMsg> postQueue)
         {
             this.dataPckDecoder = dataPckDecoder;
             this.commPortConfig = commPortConfig;
@@ -138,7 +140,7 @@ namespace QuadComms.CommControllers
                             {
                                 Task.Factory.StartNew(() =>
                                 {
-                                    this.recvQueue.Enqueue(rawDataRcv);
+                                    this.dataPckReceivedQueue.Enqueue(rawDataRcv);
                                     Debug.WriteLine("Recv msg tyep {0}", BitConverter.ToUInt32(rawDataRcv, 6));
                                     Debug.WriteLine("timeout {0}", this.pckRecvTimer);
                                 });
@@ -214,6 +216,7 @@ namespace QuadComms.CommControllers
                         {
                             case Mode.Syched:
                                 {
+                                    this.ReceiveDataPckAction();
                                     this.TransmitAction();
                                     break;
                                 }
@@ -226,20 +229,20 @@ namespace QuadComms.CommControllers
                 });
         }
 
-        /*private void ReceiveDataPckAction()
+        private void ReceiveDataPckAction()
         {
             if (this.dataPckReceivedQueue.Any())
             {
-                List<byte> dataPckRecvRaw;
+                byte[] dataPckRecvRaw;
 
                 if (this.dataPckReceivedQueue.TryDequeue(out dataPckRecvRaw))
                 {
                     DecodedDataPck decodedDataPck;
-                    this.DataPckDecoder.Decode(dataPckRecvRaw.ToArray(), out decodedDataPck);
-                    this.BuildDataPck(decodedDataPck);
+                    this.dataPckDecoder.Decode(dataPckRecvRaw, out decodedDataPck);
+                    this.ProcessNewDataPck(decodedDataPck);
                 }
             }
-        }*/
+        }
 
         private void TransmitAction()
         {
@@ -287,123 +290,36 @@ namespace QuadComms.CommControllers
         {
             if (dataPck.DataPck != null && dataPck.Status == DecodeStatus.Complete)
             {
-
-            }
-        }
-       /* private void BuildDataPck(DecodedDataPck dataPck)
-        {
-            if (dataPck.DataPck != null && dataPck.Status == DecodeStatus.Complete)
-            {
-                if (this.lastMsgReceived != DataPckTypes.DataPcks.SendConf && 
-                    this.lastMsgReceived == dataPck.DataPck.Type &&
-                    this.transAction != TransmissionAction.WaitingAck)
+                switch (dataPck.DataPck.Type)
                 {
-                    //Send Ack
-                    this.SendDataPck(new ReSendDataPckController(DataPckTypes.False)
+                    case DataPckTypes.DataPcks.SendConf:
                         {
-                            CrcController = new CRC32()
-                        }.GetByteArray());
-
-                    this.lastMsgReceived = DataPckTypes.DataPcks.NoMsg;
-                   // this.ignoreNextDataPck = true;
-                }
-                else
-                {  
-                    this.SetLastMsgReceived(dataPck.DataPck);
-                    switch (dataPck.DataPck.Type)
-                    {
-                        case DataPckTypes.DataPcks.SendConf:
+                            if (this.transAction == TransmissionAction.WaitingAck)
                             {
-                                if (this.transAction == TransmissionAction.WaitingAck)
-                                {
-                                    this.transAction = TransmissionAction.WaitingDataPckSend;
-                                    
-                                }
-                                break;
+                                this.transAction = TransmissionAction.WaitingDataPckSend;
                             }
-                        case DataPckTypes.DataPcks.FlightData:
+                            break;
+                        }
+                    default:
+                        {
+                            if (dataPck.DataPck.AckRequired == DataPckTypes.True)
                             {
-                                recvedDataPcks.Add(
-                                    new FlightDataDataPckController((FlightData)dataPck.DataPck)
-                                    {
-                                        CRCStatus = dataPck.Status
-                                    });
-                               
-                                break;
-                            }
-                        case DataPckTypes.DataPcks.Message:
-                        case DataPckTypes.DataPcks.FreeTxtMsg:
-                            {
-                                    recvedDataPcks.Add(
-                                        new MsgDataPckController((MsgData)dataPck.DataPck)
-                                        {
-                                            CRCStatus = dataPck.Status
-                                        });
-
-                                if (dataPck.DataPck.Type != DataPckTypes.DataPcks.FreeTxtMsg)
-                                {
-                                    this.SendDataPck(new ReSendDataPckController(DataPckTypes.False)
-                                        {
-                                            CrcController = new CRC32()
-                                        }.GetByteArray());
-
-                                    this.lastMsgReceived = DataPckTypes.DataPcks.NoMsg;
-                                }
-
-                                break;
-                            }
-                            case DataPckTypes.DataPcks.RequestData:
-                            {
-                                recvedDataPcks.Add(new DataRequestDataPckController((DataRequest)dataPck.DataPck)
-                                    {
-                                        CRCStatus = dataPck.Status
-                                    });
-
+                                //Send Ack
                                 this.SendDataPck(new ReSendDataPckController(DataPckTypes.False)
                                 {
                                     CrcController = new CRC32()
                                 }.GetByteArray());
+                            }
 
-                                this.lastMsgReceived = DataPckTypes.DataPcks.NoMsg;
-                                break;
-                            }
-                        case DataPckTypes.DataPcks.SystemId:
-                            {
-                                recvedDataPcks.Add(
-                                    new SystemIdDataPckController((SystemId)dataPck.DataPck)
-                                    {
-                                        CRCStatus = dataPck.Status
-                                    });
-                                break;
-                            }
-                        case DataPckTypes.DataPcks.DataLogger:
-                            {
-                                recvedDataPcks.Add(
-                                    new DataLoggerDataPckController((DataLogger)dataPck.DataPck)
-                                    {
-                                        CRCStatus = dataPck.Status
-                                    });
-                                break;
-                            }
-                        default:
-                            {
-                                break;
-                            }
-                    }
+                            //Push the new message onto the recv queue for the message processing obj
+                            this.recvQueue.Enqueue(new QuadRecvPck(dataPck.DataPck, dataPck.DataPckCrc));
+
+                            break;
+                        }
                 }
-
-                
             }
-        }*/
-        /*
-        private void SetLastMsgReceived(DataPck dataPcks)
-        {
-           if (dataPcks.Type != DataPckTypes.DataPcks.SendConf & dataPcks.Type != DataPckTypes.DataPcks.FreeTxtMsg)
-           {
-               this.lastMsgReceived = dataPcks.Type;
-           }
         }
-        */
+
         private void SendDataPck(byte[] dataPckToSend)
         {
             var blocksSent = 0;
@@ -421,37 +337,5 @@ namespace QuadComms.CommControllers
                 Thread.Sleep(1);
             } 
         }
-
-       /*
-        public IDataDecoder DataPckDecoder
-        {
-            get
-            {
-                if (this.dataPckDecoder == null)
-                {
-                    throw new ArgumentNullException();
-                }
-
-                return this.dataPckDecoder;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException();
-                }
-
-                this.dataPckDecoder = value;
-            }
-        }
-
-
-        public SystemModes SysMode
-        {
-            set
-            {
-               this.mode = value;
-            }
-        }*/
     }
 }
