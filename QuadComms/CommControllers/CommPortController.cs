@@ -1,4 +1,5 @@
 ﻿using MbedQuad;
+using Ninject;
 using QuadComms.CRC32Generator;
 using QuadComms.DataPckControllers.DataPckRecvControllers;
 using QuadComms.DataPckControllers.DataPckRecvControllers.DataLoggerDataPckController;
@@ -55,11 +56,11 @@ namespace QuadComms.CommControllers
         private CommPortConfig commPortConfig;
         private TransmissionAction transAction;
         private byte[] receiveBufBuildingPck;
-        private IPostQueueMsg dataPckSent;
+        private IQuadTransQueueMsg dataPckSent;
         private IDataDecoder dataPckDecoder;
         private List<byte> rawDataPack;
-        ConcurrentQueue<IQuadRecvMsgQueue> recvQueue;
-        ConcurrentQueue<IPostQueueMsg> postQueue;
+        IDataTransferQueue<IQuadRecvMsgQueue> recvQueue;
+        IDataTransferQueue<IQuadTransQueueMsg> postQueue;
         private ConcurrentQueue<byte[]> dataPckReceivedQueue = new ConcurrentQueue<byte[]>();
         private int pckRecvTimer;
         private int sendTicks;
@@ -67,7 +68,11 @@ namespace QuadComms.CommControllers
 
 
 
-        public CommPortController(IDataDecoder dataPckDecoder, CommPortConfig commPortConfig, ConcurrentQueue<IQuadRecvMsgQueue> recvQueue, ConcurrentQueue<IPostQueueMsg> postQueue)
+        public CommPortController(
+            IDataDecoder dataPckDecoder, 
+            CommPortConfig commPortConfig,
+            [Named("QuadRecvQueue")]IDataTransferQueue<IQuadRecvMsgQueue> recvQueue,
+            [Named("QuadTransQueue")]IDataTransferQueue<IQuadTransQueueMsg> postQueue)
         {
             this.dataPckDecoder = dataPckDecoder;
             this.commPortConfig = commPortConfig;
@@ -260,7 +265,7 @@ namespace QuadComms.CommControllers
                         {
                             if (this.postQueue.Any())
                             {
-                                if (this.postQueue.TryDequeue(out dataPckSent))
+                                if (this.postQueue.Remove(out dataPckSent))
                                 {
                                     if (dataPckSent.Ackrequired)
                                     {
@@ -312,7 +317,7 @@ namespace QuadComms.CommControllers
                             }
 
                             //Push the new message onto the recv queue for the message processing obj
-                            this.recvQueue.Enqueue(new QuadRecvPck(dataPck.DataPck, dataPck.DataPckCrc));
+                            this.recvQueue.Add(new QuadRecvPck(dataPck.DataPck, dataPck.DataPckCrc));
 
                             break;
                         }

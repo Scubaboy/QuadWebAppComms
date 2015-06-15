@@ -13,6 +13,8 @@ using QuadComms.CommsProgress;
 using QuadComms.DataPckDecoderControllers.Binary;
 using QuadComms.Interfaces.CommsChannel;
 using QuadComms.Interfaces.MsgProcessor;
+using QuadComms.IoC.Ninject;
+using Ninject;
 
 namespace QuadComms
 {
@@ -20,19 +22,21 @@ namespace QuadComms
     {
         private ICommsChannel commChannel;
         private IMsgProcessor msgProcessor;
+        private NinjectIoC kernel;
 
         private CancellationToken cancelToken;
 
-        public CommsController(CancellationToken cancellationToken, SupportedChannels channel)
+        public CommsController( SupportedChannels channel)
         {
             switch (channel)
             {
                 case SupportedChannels.Comm:
                     {
-                       // commChannel = new CommPortController("com5", 9600, Parity.None, StopBits.One, Handshake.None,8);
-                      //  var decoder = new BinaryDecoder();
-                      //  decoder.CrcController = new CRC32();
-                       // commChannel.DataPckDecoder = decoder;
+                        this.kernel = new NinjectIoC();
+                       
+
+                        commChannel = this.kernel.Kernel.Get<ICommsChannel>();
+                        msgProcessor = this.kernel.Kernel.Get<IMsgProcessor>();
                         break;
                     }
                     case SupportedChannels.Tcpip:
@@ -42,7 +46,7 @@ namespace QuadComms
                     }
             }
 
-            this.cancelToken = cancellationToken;
+           
 
         }
 

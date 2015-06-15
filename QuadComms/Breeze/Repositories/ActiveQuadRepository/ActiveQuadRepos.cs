@@ -20,7 +20,7 @@ namespace QuadComms.Breeze.Repositories.ActiveQuadRepository
 
         public ActiveQuadRepos(IBreezeEntityManagerFactory entityManagerFact, string serviceName)
         {
-            this.reposEntityManager = entityManagerFact.CreateEntityManager(serviceName);
+           // this.reposEntityManager = entityManagerFact.CreateEntityManager(serviceName);
             this.theQuery = new EntityQuery<ActiveQuadEntity>();
             this.primed = false;
         }

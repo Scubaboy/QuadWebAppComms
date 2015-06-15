@@ -18,7 +18,7 @@ namespace QuadComms.DataPckDecoderControllers.Binary
     {
         private ICRC crcController;
 
-        internal BinaryDecoder()
+        public BinaryDecoder()
         {
             this.crcController = null;
         }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace QuadComms.QueuePackets.Post
 {
-    public class PostPck : IPostQueueMsg
+    public class PostPck : IQuadTransQueueMsg
     {
         public PostPck(byte[] data, bool ackRequired = false)
         {

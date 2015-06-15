@@ -1,4 +1,5 @@
-﻿using QuadComms.DataPckControllers.DataPckRecvControllers;
+﻿using Ninject;
+using QuadComms.DataPckControllers.DataPckRecvControllers;
 using QuadComms.DataPckControllers.DataPckRecvControllers.FlightDataDataPckController;
 using QuadComms.DataPckControllers.DataPckRecvControllers.MsgDataPckController;
 using QuadComms.DataPckDecoderControllers.DecoderTypes;
@@ -24,19 +25,20 @@ namespace QuadComms.MessageProcessors.Standard
 {
     public class StdMsgProcessor : IMsgProcessor
     {
-        private ConcurrentQueue<IPostQueueMsg> postQueue;
-        private ConcurrentQueue<IQuadRecvMsgQueue> quadRecvQueue;
-        private ConcurrentQueue<ISignalRRecvQueueMsg> sigRRecvQueue;
-        private ConcurrentQueue<ISigRPostQueueMsg<DataPckRecvController>> sigRPostQueue;
+        private IDataTransferQueue<IQuadTransQueueMsg> postQueue;
+        private IDataTransferQueue<IQuadRecvMsgQueue> quadRecvQueue;
+        private IDataTransferQueue<ISignalRRecvQueueMsg> sigRRecvQueue;
+        private IDataTransferQueue<ISigRPostQueueMsg<DataPckRecvController>> sigRPostQueue;
         private UInt32 lastMsgCRC = 0;
         private IBreezeRepository<ActiveQuad> activeQuadRepos;
 
         private const int MsgProcessTaskSleep = 500;
 
-        public StdMsgProcessor(ConcurrentQueue<IQuadRecvMsgQueue> quadRecvQueue, 
-            ConcurrentQueue<ISignalRRecvQueueMsg> sigRRecvQueue,
-            ConcurrentQueue<ISigRPostQueueMsg<DataPckRecvController>> sigRPostQueue, 
-            ConcurrentQueue<IPostQueueMsg> postQueue,
+        public StdMsgProcessor(
+            [Named("QuadRecvQueue")]IDataTransferQueue<IQuadRecvMsgQueue> quadRecvQueue,
+            [Named("SigRRecvQueue")]IDataTransferQueue<ISignalRRecvQueueMsg> sigRRecvQueue,
+            [Named("SigRTransQueue")]IDataTransferQueue<ISigRPostQueueMsg<DataPckRecvController>> sigRPostQueue,
+            [Named("QuadTransQueue")]IDataTransferQueue<IQuadTransQueueMsg> postQueue,
             IBreezeRepository<ActiveQuad> activeQuadRepos)
         {
             this.postQueue = postQueue;
@@ -76,7 +78,7 @@ namespace QuadComms.MessageProcessors.Standard
             {
                 IQuadRecvMsgQueue nextMsg = null;
 
-                if (this.quadRecvQueue.TryDequeue(out nextMsg))
+                if (this.quadRecvQueue.Remove(out nextMsg))
                 {
                     if (this.lastMsgCRC != nextMsg.CRC)
                     {
@@ -88,7 +90,7 @@ namespace QuadComms.MessageProcessors.Standard
                             case DataPckTypes.DataPcks.FlightData:
                                 {
                                     //post to the signalR queue.
-                                    sigRPostQueue.Enqueue(new SigRPostPck<FlightDataDataPckController>(
+                                    sigRPostQueue.Add(new SigRPostPck<FlightDataDataPckController>(
                                         new FlightDataDataPckController((FlightData)nextMsg.Msg)
                                         {
                                             CRCStatus = DecodeStatus.Complete
@@ -100,7 +102,7 @@ namespace QuadComms.MessageProcessors.Standard
                             case DataPckTypes.DataPcks.FreeTxtMsg:
                                 {
                                     //post to the signalR queue.
-                                    sigRPostQueue.Enqueue(new SigRPostPck<MsgDataPckController>(
+                                    sigRPostQueue.Add(new SigRPostPck<MsgDataPckController>(
                                         new MsgDataPckController((MsgData)nextMsg.Msg)
                                         {
                                             CRCStatus = DecodeStatus.Complete
@@ -110,7 +112,7 @@ namespace QuadComms.MessageProcessors.Standard
                             case DataPckTypes.DataPcks.Message:
                                 {
                                     //post to the signalR queue.
-                                    sigRPostQueue.Enqueue(new SigRPostPck<MsgDataPckController>(
+                                    sigRPostQueue.Add(new SigRPostPck<MsgDataPckController>(
                                         new MsgDataPckController((MsgData)nextMsg.Msg)
                                         {
                                             CRCStatus = DecodeStatus.Complete

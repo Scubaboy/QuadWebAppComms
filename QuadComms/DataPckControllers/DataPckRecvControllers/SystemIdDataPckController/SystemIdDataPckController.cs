@@ -1,7 +1,8 @@
 ﻿using System;
 
 using QuadComms.DataPcks.SystemId;
-using MbedQuad;
+using QuadModels;
+
 
 namespace QuadComms.DataPckControllers.DataPckRecvControllers.SystemIdDataPckController
 {
@@ -39,17 +40,17 @@ namespace QuadComms.DataPckControllers.DataPckRecvControllers.SystemIdDataPckCon
             get { return this.systemId.platform; }
         }
 
-        public TelemetryFeeds TelemetryFeed
+        public CommsOptions TelemetryFeed
         {
             get { return this.systemId.telemtryfeeds; }
         }
 
-        public IMUOptions IMUOptions
+        public IMUOpions IMUOptions
         {
             get { return this.systemId.imu; }
         }
 
-        public GPSMsgFormats GPSMsgFormat
+        public GPSOptions GPSMsgFormat
         {
             get { return this.systemId.gpsMsgFormat; }
         }

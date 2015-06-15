@@ -58,6 +58,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Ninject">
+      <HintPath>packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
+    </Reference>
     <Reference Include="NLog">
       <HintPath>packages\NLog.3.2.1\lib\net45\NLog.dll</HintPath>
     </Reference>
@@ -90,6 +93,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Breeze\EntityManagerFactory\EntityMgrFact.cs" />
     <Compile Include="CommControllers\CommPortConfig.cs" />
     <Compile Include="CommsController.cs" />
     <Compile Include="CommControllers\CommChannelTypes.cs" />
@@ -140,16 +144,19 @@
     <Compile Include="Interfaces\CRCInterface\ICRC.cs" />
     <Compile Include="Interfaces\DataPckTransControllerInterface\IDataPckTransController.cs" />
     <Compile Include="Interfaces\MsgProcessor\IMsgProcessor.cs" />
-    <Compile Include="Interfaces\Queues\IPostQueueMsg.cs" />
+    <Compile Include="Interfaces\Queues\IDataTransferQueue.cs" />
+    <Compile Include="Interfaces\Queues\IQuadTransQueueMsg.cs" />
     <Compile Include="Interfaces\Queues\IQuadRecvMsgQueue.cs" />
     <Compile Include="Interfaces\Queues\ISignalRRecvQueueMsg.cs" />
     <Compile Include="Interfaces\Queues\ISigRPostQueueMsg.cs" />
     <Compile Include="Interfaces\SignalR\ISignalRClient.cs" />
+    <Compile Include="IoC\Ninject\NinjectIoC.cs" />
     <Compile Include="MessageProcessors\Standard\StdMsgProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueuePackets\Post\PostPck.cs" />
     <Compile Include="QueuePackets\QuadRecv\QuadRecvPck.cs" />
     <Compile Include="QueuePackets\SigRPost\SigRPostPck.cs" />
+    <Compile Include="Queues\QuadConcurrentQueue\QuadQueue.cs" />
     <Compile Include="SignalR\MessageHub\MessageHugClient.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -163,7 +170,9 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Ninject\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="MbedQuad\MbedQuad.csproj">
       <Project>{17bdc655-a90f-47ee-a410-12a654407e1e}</Project>
