@@ -67,8 +67,9 @@
     <Reference Include="QuadModelEntityExtensions">
       <HintPath>packages\QuadModelEntityExtensions.1.0.0-CI00000\lib\net40\QuadModelEntityExtensions.dll</HintPath>
     </Reference>
-    <Reference Include="QuadModels">
-      <HintPath>packages\QuadModels.1.0.0-CI00023\lib\net40\QuadModels.dll</HintPath>
+    <Reference Include="QuadModels, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>packages\QuadModels.1.0.0-CI00026\lib\net40\QuadModels.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />

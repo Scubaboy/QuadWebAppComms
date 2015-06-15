@@ -12,12 +12,15 @@ using QuadComms.CommControllers;
 using QuadComms.CommsProgress;
 using QuadComms.DataPckDecoderControllers.Binary;
 using QuadComms.Interfaces.CommsChannel;
+using QuadComms.Interfaces.MsgProcessor;
 
 namespace QuadComms
 {
     public class CommsController
     {
         private ICommsChannel commChannel;
+        private IMsgProcessor msgProcessor;
+
         private CancellationToken cancelToken;
 
         public CommsController(CancellationToken cancellationToken, SupportedChannels channel)
@@ -46,32 +49,8 @@ namespace QuadComms
         public async Task CommsControllerAsync()
         {
             this.commChannel.Setup();
-            await commChannel.Start(this.cancelToken);
-        }
-
-        //COuld use signalr for message trans and mode changes.
-
-     //   public async Task CommsSerialReaderAsync()
-      //  {
-      //      this.commChannel.Setup();
-      //      await commChannel.ReadSerial(this.cancelToken);
-      //  }
-      //  public void AddDataPckToSendQueue(byte[] dataPck)
-      //  {
-     //       this.commChannel.AppendData(dataPck);
-     //   }
-
-      //  public SystemModes Mode
-     //   {
-      //      set
-      //      {
-      //          if (this.commChannel != null)
-      //          {
-      //              this.commChannel.SysMode = value;
-      //          }
-      //      }
-     //   }
-
-   
+          
+            await Task.WhenAll(commChannel.Start(this.cancelToken), this.msgProcessor.Start());
+        }   
     }
 }
