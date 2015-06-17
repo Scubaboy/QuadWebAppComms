@@ -97,7 +97,9 @@
     <Compile Include="CommControllers\CommPortConfig.cs" />
     <Compile Include="CommsController.cs" />
     <Compile Include="CommControllers\CommChannelTypes.cs" />
-    <Compile Include="CommControllers\CommPortController.cs" />
+    <Compile Include="CommControllers\CommController.cs" />
+    <Compile Include="CommsChannels\BasicChannel.cs" />
+    <Compile Include="CommsDevices\SerialComms\Serial.cs" />
     <Compile Include="CommsProgress\Progress.cs" />
     <Compile Include="CommsProgress\Status\SendReceiveStatus.cs" />
     <Compile Include="CRC32Generator\CRC32.cs" />
@@ -132,7 +134,9 @@
     <Compile Include="Interfaces\Breeze\IBreezeDataContext.cs" />
     <Compile Include="Interfaces\Breeze\IBreezeRepository.cs" />
     <Compile Include="Breeze\Repositories\ActiveQuadRepository\ActiveQuadRepos.cs" />
-    <Compile Include="Interfaces\CommsChannel\ICommStatus.cs" />
+    <Compile Include="Interfaces\CommsController\ICommStatus.cs" />
+    <Compile Include="Interfaces\CommsChannel\ICommsChannel.cs" />
+    <Compile Include="Interfaces\CommsDevice\ICommsDevice.cs" />
     <Compile Include="Interfaces\DataDecoder\IDataDecoder.cs" />
     <Compile Include="DataPackerHelpers\ByteSwapper.cs" />
     <Compile Include="DataPckControllers\DataPckTransControllers\ActiveDataPckController\ActiveDataPckController.cs" />
@@ -140,7 +144,7 @@
     <Compile Include="DataPcks\ActivateDataPck\Activate.cs" />
     <Compile Include="DataPcks\DataPck.cs" />
     <Compile Include="DataPcks\DataPckTypes.cs" />
-    <Compile Include="Interfaces\CommsChannel\ICommsChannel.cs" />
+    <Compile Include="Interfaces\CommsController\ICommsController.cs" />
     <Compile Include="Interfaces\CRCInterface\ICRC.cs" />
     <Compile Include="Interfaces\DataPckTransControllerInterface\IDataPckTransController.cs" />
     <Compile Include="Interfaces\MsgProcessor\IMsgProcessor.cs" />

@@ -1,20 +1,17 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Threading;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using MbedQuad;
-using QuadComms.CommsProgress;
-using QuadComms.Interfaces.DataDecoder;
 
 namespace QuadComms.Interfaces.CommsChannel
 {
-    internal interface ICommsChannel
+    public interface ICommsChannel
     {
-       // void AppendData(byte[] data);
-        void Setup();
-        //SystemModes SysMode { set; }
-        Task Start(CancellationToken cancellationToken);
-        //Task ReadSerial(CancellationToken cancellationToken);
-        //IDataDecoder DataPckDecoder { get; set; }
+        void ProcessCommsChannel(); 
+        bool DataPcksAvailable();
+        bool TakeDataPck(out byte[] rawDataPck);
+        void QueueDataPck(byte[] dataPck);
+        void Close();
     }
 }

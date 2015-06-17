@@ -15,12 +15,13 @@ using QuadComms.Interfaces.CommsChannel;
 using QuadComms.Interfaces.MsgProcessor;
 using QuadComms.IoC.Ninject;
 using Ninject;
+using QuadComms.Interfaces.CommsController;
 
 namespace QuadComms
 {
     public class CommsController
     {
-        private ICommsChannel commChannel;
+        private ICommsController commChannel;
         private IMsgProcessor msgProcessor;
         private NinjectIoC kernel;
 
@@ -35,7 +36,7 @@ namespace QuadComms
                         this.kernel = new NinjectIoC();
                        
 
-                        commChannel = this.kernel.Kernel.Get<ICommsChannel>();
+                        commChannel = this.kernel.Kernel.Get<ICommsController>();
                         msgProcessor = this.kernel.Kernel.Get<IMsgProcessor>();
                         break;
                     }

@@ -2,10 +2,14 @@
 using QuadComms.Breeze.EntityManagerFactory;
 using QuadComms.Breeze.Repositories.ActiveQuadRepository;
 using QuadComms.CommControllers;
+using QuadComms.CommsChannels;
+using QuadComms.CommsDevices.SerialComms;
 using QuadComms.DataPckControllers.DataPckRecvControllers;
 using QuadComms.DataPckDecoderControllers.Binary;
 using QuadComms.Interfaces.Breeze;
 using QuadComms.Interfaces.CommsChannel;
+using QuadComms.Interfaces.CommsController;
+using QuadComms.Interfaces.CommsDevice;
 using QuadComms.Interfaces.DataDecoder;
 using QuadComms.Interfaces.MsgProcessor;
 using QuadComms.Interfaces.Queues;
@@ -63,15 +67,23 @@ namespace QuadComms.IoC.Ninject
                 .To<BinaryDecoder>();
 
             kernel
+                .Bind<ICommsController>()
+                .To<CommController>();
+
+            kernel
                 .Bind<ICommsChannel>()
-                .To<CommPortController>()
+                .To<BasicChannel>();
+
+            kernel
+                .Bind<ICommsDevice>()
+                .To<Serial>()
                 .WithConstructorArgument<CommPortConfig>(
                 new CommPortConfig(
-                    "com5", 
-                    9600, 
-                    Parity.None, 
-                    StopBits.One, 
-                    Handshake.None, 
+                    "com5",
+                    9600,
+                    Parity.None,
+                    StopBits.One,
+                    Handshake.None,
                     8));
 
             kernel
