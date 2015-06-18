@@ -75,12 +75,12 @@ namespace QuadComms.CommsChannels
 
                             if (rawDataRcv[0] == 60 && rawDataRcv[1] == 60 && rawDataRcv[198] == 62 && rawDataRcv[199] == 62)
                             {
-                                Task.Factory.StartNew(() =>
-                                {
+                              //  Task.Factory.StartNew(() =>
+                               // {
                                     this.dataPckReceivedQueue.Enqueue(rawDataRcv);
                                     Debug.WriteLine("Recv msg tyep {0}", BitConverter.ToUInt32(rawDataRcv, 6));
                                     Debug.WriteLine("timeout {0}", this.pckRecvTimer);
-                                });
+                               // });
                             }
                             else
                             {
@@ -184,6 +184,12 @@ namespace QuadComms.CommsChannels
         public void Close()
         {
             this.commsDevice.Close();
+        }
+
+        public void ClearInput()
+        {
+            this.commsDevice.ClearInput();
+            this.commsDevice.ClearOutput();
         }
     }
 }

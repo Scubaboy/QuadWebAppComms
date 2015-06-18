@@ -4,12 +4,14 @@ using QuadComms.Breeze.Repositories.ActiveQuadRepository;
 using QuadComms.CommControllers;
 using QuadComms.CommsChannels;
 using QuadComms.CommsDevices.SerialComms;
+using QuadComms.CRC32Generator;
 using QuadComms.DataPckControllers.DataPckRecvControllers;
 using QuadComms.DataPckDecoderControllers.Binary;
 using QuadComms.Interfaces.Breeze;
 using QuadComms.Interfaces.CommsChannel;
 using QuadComms.Interfaces.CommsController;
 using QuadComms.Interfaces.CommsDevice;
+using QuadComms.Interfaces.CRCInterface;
 using QuadComms.Interfaces.DataDecoder;
 using QuadComms.Interfaces.MsgProcessor;
 using QuadComms.Interfaces.Queues;
@@ -73,6 +75,10 @@ namespace QuadComms.IoC.Ninject
             kernel
                 .Bind<ICommsChannel>()
                 .To<BasicChannel>();
+
+            kernel
+                .Bind<ICRC>()
+                .To<CRC32>();
 
             kernel
                 .Bind<ICommsDevice>()

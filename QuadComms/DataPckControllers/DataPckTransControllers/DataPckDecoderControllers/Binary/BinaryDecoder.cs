@@ -18,22 +18,9 @@ namespace QuadComms.DataPckDecoderControllers.Binary
     {
         private ICRC crcController;
 
-        public BinaryDecoder()
+        public BinaryDecoder(ICRC CrcController)
         {
-            this.crcController = null;
-        }
-
-        public ICRC CrcController
-        {
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException();
-                }
-
-                this.crcController = value;
-            }
+            this.crcController = CrcController;
         }
 
         public void Decode(byte[] dataPck, out DecodedDataPck decodedDataPck)

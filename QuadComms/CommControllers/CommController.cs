@@ -89,6 +89,7 @@ namespace QuadComms.CommControllers
         {
             return Task.Run(() =>
                 {
+                    this.commsChannel.ClearInput();
                     while (!cancellationToken.IsCancellationRequested)
                     {
                         this.commsChannel.ProcessCommsChannel();

@@ -8,6 +8,7 @@ namespace QuadComms.Interfaces.CommsChannel
 {
     public interface ICommsChannel
     {
+        void ClearInput();
         void ProcessCommsChannel(); 
         bool DataPcksAvailable();
         bool TakeDataPck(out byte[] rawDataPck);
