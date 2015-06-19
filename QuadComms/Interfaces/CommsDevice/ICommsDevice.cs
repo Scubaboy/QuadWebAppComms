@@ -16,6 +16,8 @@ namespace QuadComms.Interfaces.CommsDevice
 
         void Read(byte[] buffer, int offset, int count);
 
+         int ReadByte();
+
         void Close();
 
         int BytesToRead

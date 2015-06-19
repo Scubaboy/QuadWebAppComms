@@ -13,6 +13,6 @@ namespace QuadComms.DataPcks
     {
         public DataPckTypes.DataPcks Type;
         public UInt32 quadID;
-        public byte AckRequired;
+        public UInt32 AckRequired;
     }
 }

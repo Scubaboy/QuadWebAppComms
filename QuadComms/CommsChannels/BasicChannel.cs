@@ -24,7 +24,8 @@ namespace QuadComms.CommsChannels
         private int pckRecvTimer;
         private ConcurrentQueue<byte[]> dataPckReceivedQueue = new ConcurrentQueue<byte[]>();
         private ConcurrentQueue<byte[]> dataPckSendQueue = new ConcurrentQueue<byte[]>();
-
+        private byte[] rawDataRcv = new byte[200];
+        private int bytesRead = 0;
         public BasicChannel(ICommsDevice commsDevice)
         {
             this.commsDevice = commsDevice;
@@ -61,13 +62,43 @@ namespace QuadComms.CommsChannels
                     }
                 case Mode.Syched:
                     {
-                        if (this.pckRecvTimer > 300)
-                        {
-                            Debug.WriteLine("timeout {0}", this.pckRecvTimer);
-                            this.commsDevice.ClearInput();
-                        }
+                        var readBytes = this.commsDevice.ReadByte();
 
-                        if (this.commsDevice.BytesToRead == 200)
+                       if (readBytes != -1)
+                       {
+                           rawDataRcv[this.bytesRead++] = (byte)readBytes;
+                       }
+
+                        if (this.bytesRead == 200)
+                        {
+                            if (rawDataRcv[0] == 60 && rawDataRcv[1] == 60 && rawDataRcv[198] == 62 && rawDataRcv[199] == 62)
+                            {
+                                //Task.Factory.StartNew(() =>
+                               // {
+                                    // this.dataPckReceivedQueue.Enqueue(rawDataRcv);
+                                    Debug.WriteLine("Recv msg tyep {0}", BitConverter.ToUInt32(rawDataRcv, 6));
+                                    Debug.WriteLine(System.DateTime.Now.ToString());
+                                    this.pckRecvTimer = 0;
+                                   // this.commsDevice.ClearInput();
+                                //});
+                                this.bytesRead = 0;
+                                this.commsDevice.ClearInput();
+                            }
+                            else
+                            {
+                                Thread.Sleep(2000);
+                                this.bytesRead = 0;
+                                this.commsDevice.ClearInput();
+                            }
+                            
+                        }
+                       // if (this.pckRecvTimer > 300)
+                       // {
+                        //    Debug.WriteLine("timeout {0}", this.pckRecvTimer);
+                        //    this.commsDevice.ClearInput();
+                       // }
+
+                     /*   if (this.commsDevice.BytesToRead == 200)
                         {
                             var rawDataRcv = new byte[200];
 
@@ -75,11 +106,13 @@ namespace QuadComms.CommsChannels
 
                             if (rawDataRcv[0] == 60 && rawDataRcv[1] == 60 && rawDataRcv[198] == 62 && rawDataRcv[199] == 62)
                             {
-                              //  Task.Factory.StartNew(() =>
+                               // Task.Factory.StartNew(() =>
                                // {
                                     this.dataPckReceivedQueue.Enqueue(rawDataRcv);
                                     Debug.WriteLine("Recv msg tyep {0}", BitConverter.ToUInt32(rawDataRcv, 6));
-                                    Debug.WriteLine("timeout {0}", this.pckRecvTimer);
+                                    Debug.WriteLine(System.DateTime.Now.ToString());
+                                    this.pckRecvTimer = 0;
+                                    this.commsDevice.ClearInput();
                                // });
                             }
                             else
@@ -104,10 +137,11 @@ namespace QuadComms.CommsChannels
                         {
                             try
                             {
-                                var rawDataRcv = new byte[this.commsDevice.BytesToRead];
+                               // var rawDataRcv = new byte[this.commsDevice.BytesToRead];
 
-                                this.commsDevice.Read(rawDataRcv, 0, rawDataRcv.Length);
+                               // this.commsDevice.Read(rawDataRcv, 0, rawDataRcv.Length);
                                 this.commsDevice.ClearInput();
+                                this.pckRecvTimer = 0;
                             }
                             catch (Exception)
                             {
@@ -120,7 +154,7 @@ namespace QuadComms.CommsChannels
                         else
                         {
                             this.pckRecvTimer++;
-                        }
+                        }*/
                         break;
                     }
             }
@@ -132,7 +166,7 @@ namespace QuadComms.CommsChannels
                 var blocksSent = 0;
                 var blockOffset = 0;
 
-                if (this.dataPckReceivedQueue.TryDequeue(out sendData))
+                if (this.dataPckSendQueue.TryDequeue(out sendData))
                 {
                      this.commsDevice.ClearOutput();
 

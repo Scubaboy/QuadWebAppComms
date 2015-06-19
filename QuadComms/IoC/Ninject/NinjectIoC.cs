@@ -46,7 +46,7 @@ namespace QuadComms.IoC.Ninject
 
             kernel
                 .Bind<IDataTransferQueue<IQuadRecvMsgQueue>>()
-                .To<QuadQueue<IQuadRecvMsgQueue>>()
+                .To<QuadQueue<IQuadRecvMsgQueue>>().InSingletonScope()
                 .Named("QuadRecvQueue");
 
             kernel

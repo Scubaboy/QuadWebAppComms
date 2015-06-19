@@ -11,7 +11,6 @@ namespace QuadComms.Interfaces.DataDecoder
 {
     internal interface IDataDecoder
     {
-        ICRC CrcController { set; }
         void Decode(byte[] dataPck, out DecodedDataPck decodedDataPck);
 
     }

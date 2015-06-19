@@ -36,7 +36,8 @@ namespace MbedQuad
     public enum IMUOptions
     {
         MPU9150 = 0,
-        DCM = 1
+        DCM = 1,
+        MPUDCM = 2
     }
 
     public enum AltimeterOptions

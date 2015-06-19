@@ -18,7 +18,7 @@ namespace QuadComms.CommsDevices.SerialComms
             this.serialPort = new SerialPort(commPortConfig.PortName, commPortConfig.Baud, commPortConfig.Parity, commPortConfig.DataBits, commPortConfig.Stopbits);
             this.serialPort.Close();
             this.serialPort.Handshake = commPortConfig.Handshake;
-            this.serialPort.ReadBufferSize = 4096;
+            this.serialPort.ReadBufferSize = 200;
             this.serialPort.WriteBufferSize = 1024;
             this.serialPort.Open();
             this.serialPort.DiscardInBuffer();
@@ -57,6 +57,12 @@ namespace QuadComms.CommsDevices.SerialComms
         public void Close()
         {
             this.serialPort.Close();
+        }
+
+
+        public int ReadByte()
+        {
+            return this.serialPort.ReadByte();
         }
     }
 }
