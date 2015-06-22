@@ -46,22 +46,26 @@ namespace QuadComms.IoC.Ninject
 
             kernel
                 .Bind<IDataTransferQueue<IQuadRecvMsgQueue>>()
-                .To<QuadQueue<IQuadRecvMsgQueue>>().InSingletonScope()
+                .To<QuadQueue<IQuadRecvMsgQueue>>()
+                .InSingletonScope()
                 .Named("QuadRecvQueue");
 
             kernel
                 .Bind<IDataTransferQueue<ISignalRRecvQueueMsg>>()
                 .To<QuadQueue<ISignalRRecvQueueMsg>>()
+                .InSingletonScope()
                 .Named("SigRRecvQueue");
 
             kernel
                 .Bind<IDataTransferQueue<ISigRPostQueueMsg<DataPckRecvController>>>()
                 .To<QuadQueue<ISigRPostQueueMsg<DataPckRecvController>>>()
+                .InSingletonScope()
                 .Named("SigRTransQueue");
 
             kernel
                 .Bind<IDataTransferQueue<IQuadTransQueueMsg>>()
                 .To<QuadQueue<IQuadTransQueueMsg>>()
+                .InSingletonScope()
                 .Named("QuadTransQueue");
 
             kernel

@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace QuadComms.Interfaces.SignalR
 {
-    public interface ISignalRClient
+    public interface ISignalRClientProxyMgr
     {
-        Task ConnectToHubAsync(string hubName);
+        Task<bool> PostToServer<T>(T msg);
 
-        Task<T> CallServerSideMethod<T>(String methodName);
-
+        Task StartClientProxies();
     }
 }

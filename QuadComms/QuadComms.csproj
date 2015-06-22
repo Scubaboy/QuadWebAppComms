@@ -153,7 +153,8 @@
     <Compile Include="Interfaces\Queues\IQuadRecvMsgQueue.cs" />
     <Compile Include="Interfaces\Queues\ISignalRRecvQueueMsg.cs" />
     <Compile Include="Interfaces\Queues\ISigRPostQueueMsg.cs" />
-    <Compile Include="Interfaces\SignalR\ISignalRClient.cs" />
+    <Compile Include="Interfaces\SignalR\ISignalRClientProxy.cs" />
+    <Compile Include="Interfaces\SignalR\ISignalRClientProxyMgr.cs" />
     <Compile Include="IoC\Ninject\NinjectIoC.cs" />
     <Compile Include="MessageProcessors\Standard\StdMsgProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -161,7 +162,8 @@
     <Compile Include="QueuePackets\QuadRecv\QuadRecvPck.cs" />
     <Compile Include="QueuePackets\SigRPost\SigRPostPck.cs" />
     <Compile Include="Queues\QuadConcurrentQueue\QuadQueue.cs" />
-    <Compile Include="SignalR\MessageHub\MessageHugClient.cs" />
+    <Compile Include="SignalR\ClientHubProxies\MsgHubClientProxy.cs" />
+    <Compile Include="SignalR\Manager\QuadSigRMgr.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
