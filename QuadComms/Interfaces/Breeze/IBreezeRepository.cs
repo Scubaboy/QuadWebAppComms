@@ -20,5 +20,7 @@ namespace QuadComms.Interfaces.Breeze
         Task<SaveResult> SaveChanges();
 
         void CancelChanges();
+
+        Task<bool> Initialise();
     }
 }

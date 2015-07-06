@@ -2,6 +2,7 @@
 using QuadComms.DataPckControllers.DataPckRecvControllers;
 using QuadComms.DataPckControllers.DataPckRecvControllers.FlightDataDataPckController;
 using QuadComms.DataPckControllers.DataPckRecvControllers.MsgDataPckController;
+using QuadComms.DataPckControllers.DataPckRecvControllers.SystemIdDataPckController;
 using QuadComms.DataPckDecoderControllers.DecoderTypes;
 using QuadComms.DataPcks;
 using QuadComms.DataPcks.FlightDataPck;
@@ -136,6 +137,14 @@ namespace QuadComms.MessageProcessors.Standard
                                     });
 
                                    var saveResult = await this.activeQuadRepos.SaveChanges();
+                                   
+                                    //Post to signalr to update clients of new quad.
+                                   sigRPostQueue.Add(new SigRPostPck<SystemIdDataPckController>(
+                                       new SystemIdDataPckController(newQuad)
+                                       {
+                                           CRCStatus = DecodeStatus.Complete
+                                       }));
+
                                     break;
                                 }
                             case DataPckTypes.DataPcks.DataLogger:

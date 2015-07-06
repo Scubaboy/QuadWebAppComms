@@ -103,7 +103,7 @@ namespace QuadComms.IoC.Ninject
             kernel
                 .Bind<IBreezeRepository<ActiveQuad>>()
                 .To<ActiveQuadRepos>()
-                .WithConstructorArgument("serviceName", "ActiveQuads");
+                .WithConstructorArgument("serviceName", "http://localhost:64297/breeze/");
 
             kernel
                 .Bind<IBreezeEntityManagerFactory>()

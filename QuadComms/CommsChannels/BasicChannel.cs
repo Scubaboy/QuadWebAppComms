@@ -26,6 +26,7 @@ namespace QuadComms.CommsChannels
         private ConcurrentQueue<byte[]> dataPckSendQueue = new ConcurrentQueue<byte[]>();
         private byte[] rawDataRcv = new byte[200];
         private int bytesRead = 0;
+
         public BasicChannel(ICommsDevice commsDevice)
         {
             this.commsDevice = commsDevice;
@@ -73,14 +74,10 @@ namespace QuadComms.CommsChannels
                         {
                             if (rawDataRcv[0] == 60 && rawDataRcv[1] == 60 && rawDataRcv[198] == 62 && rawDataRcv[199] == 62)
                             {
-                                //Task.Factory.StartNew(() =>
-                               // {
-                                    // this.dataPckReceivedQueue.Enqueue(rawDataRcv);
-                                    Debug.WriteLine("Recv msg tyep {0}", BitConverter.ToUInt32(rawDataRcv, 6));
-                                    Debug.WriteLine(System.DateTime.Now.ToString());
-                                    this.pckRecvTimer = 0;
-                                   // this.commsDevice.ClearInput();
-                                //});
+                                this.dataPckReceivedQueue.Enqueue(rawDataRcv);
+                                Debug.WriteLine("Recv msg tyep {0}", BitConverter.ToUInt32(rawDataRcv, 6));
+                                Debug.WriteLine(System.DateTime.Now.ToString());
+                                this.pckRecvTimer = 0;
                                 this.bytesRead = 0;
                                 this.commsDevice.ClearInput();
                             }
@@ -92,69 +89,7 @@ namespace QuadComms.CommsChannels
                             }
                             
                         }
-                       // if (this.pckRecvTimer > 300)
-                       // {
-                        //    Debug.WriteLine("timeout {0}", this.pckRecvTimer);
-                        //    this.commsDevice.ClearInput();
-                       // }
 
-                     /*   if (this.commsDevice.BytesToRead == 200)
-                        {
-                            var rawDataRcv = new byte[200];
-
-                            this.commsDevice.Read(rawDataRcv, 0, rawDataRcv.Length);
-
-                            if (rawDataRcv[0] == 60 && rawDataRcv[1] == 60 && rawDataRcv[198] == 62 && rawDataRcv[199] == 62)
-                            {
-                               // Task.Factory.StartNew(() =>
-                               // {
-                                    this.dataPckReceivedQueue.Enqueue(rawDataRcv);
-                                    Debug.WriteLine("Recv msg tyep {0}", BitConverter.ToUInt32(rawDataRcv, 6));
-                                    Debug.WriteLine(System.DateTime.Now.ToString());
-                                    this.pckRecvTimer = 0;
-                                    this.commsDevice.ClearInput();
-                               // });
-                            }
-                            else
-                            {
-                                try
-                                {
-                                    this.commsDevice.ClearInput();
-                                }
-                                catch (Exception)
-                                {
-
-
-                                }
-
-                            }
-                        }
-                        else if (this.commsDevice.BytesToRead == 0)
-                        {
-                            this.pckRecvTimer = 0;
-                        }
-                        else if (this.commsDevice.BytesToRead > 200)
-                        {
-                            try
-                            {
-                               // var rawDataRcv = new byte[this.commsDevice.BytesToRead];
-
-                               // this.commsDevice.Read(rawDataRcv, 0, rawDataRcv.Length);
-                                this.commsDevice.ClearInput();
-                                this.pckRecvTimer = 0;
-                            }
-                            catch (Exception)
-                            {
-
-
-                            }
-
-                            Debug.WriteLine("Lost buffer timing");
-                        }
-                        else
-                        {
-                            this.pckRecvTimer++;
-                        }*/
                         break;
                     }
             }

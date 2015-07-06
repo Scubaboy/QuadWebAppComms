@@ -20,8 +20,9 @@ namespace QuadComms.Breeze.Repositories.ActiveQuadRepository
 
         public ActiveQuadRepos(IBreezeEntityManagerFactory entityManagerFact, string serviceName)
         {
-           // this.reposEntityManager = entityManagerFact.CreateEntityManager(serviceName);
-            this.theQuery = new EntityQuery<ActiveQuadEntity>();
+            this.reposEntityManager = entityManagerFact.CreateEntityManager(serviceName);
+            
+            this.theQuery = new EntityQuery<ActiveQuadEntity>("ActiveQuads");
             this.primed = false;
         }
 
@@ -42,6 +43,11 @@ namespace QuadComms.Breeze.Repositories.ActiveQuadRepository
 
         public bool Add(ActiveQuad item)
         {
+            if (!primed)
+            {
+                this.reposEntityManager.FetchMetadata();
+            }
+
             var theEntity = this.reposEntityManager.AddEntity(item.ToEntity());
 
             return theEntity.EntityAspect.EntityState == EntityState.Added;
@@ -116,6 +122,15 @@ namespace QuadComms.Breeze.Repositories.ActiveQuadRepository
             }
 
             return await this.reposEntityManager.ExecuteQuery<ActiveQuadEntity>(this.theQuery);
+        }
+
+
+        public async Task<bool> Initialise()
+        {
+            //Build metadata.
+            var result = await this.reposEntityManager.FetchMetadata(this.reposEntityManager.DataService);
+
+            return result != null;
         }
     }
 }

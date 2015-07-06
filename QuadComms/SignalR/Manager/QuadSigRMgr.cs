@@ -26,7 +26,8 @@ namespace QuadComms.SignalR.Manager
 
         public async Task StartClientProxies()
         {
-            throw new NotImplementedException();
+            //Start all client proxies.
+            await Task.WhenAll(this.clientHubProxies.Select(proxy => proxy.StartClientProxy())).ConfigureAwait(false);
         }
 
         private void RegisterClientMsgTypes()

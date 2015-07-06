@@ -179,10 +179,10 @@ namespace QuadComms.CommControllers
                             if (dataPck.DataPck.AckRequired == DataPckTypes.True)
                             {
                                 //Send Ack
-                            //    this.SendDataPck(new ReSendDataPckController(DataPckTypes.False)
-                            //    {
-                             //       CrcController = new CRC32()
-                            //    }.GetByteArray());
+                                this.SendDataPck(new ReSendDataPckController(DataPckTypes.False)
+                                {
+                                    CrcController = new CRC32()
+                                }.GetByteArray());
                             }
 
                             //Push the new message onto the recv queue for the message processing obj
