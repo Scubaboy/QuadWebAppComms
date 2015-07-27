@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNet.SignalR.Client;
+using QuadComms.DataPckControllers.DataPckRecvControllers.MsgDataPckController;
 using QuadComms.Interfaces.SignalR;
+using QuadSignalRMsgs.HubResponces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,7 +11,18 @@ namespace QuadComms.SignalR.ClientHubProxies
     internal class MsgHubClientProxy : ISignalRClientProxy
     {
         private string hubUrl;
+        
         private IHubProxy hubProxy;
+        
+        private List<Type> supportedMsgs = new List<Type>
+        {
+            typeof(MsgDataPckController)
+        };
+
+        private Dictionary<Type, string> QuadMsgToHubMethMap = new Dictionary<Type, string>
+        {
+            {typeof(MsgDataPckController), "MsgFromQuad"}
+        };
 
         private HubConnection hub;
 
@@ -20,14 +33,24 @@ namespace QuadComms.SignalR.ClientHubProxies
 
         public List<Type> SupportedMsgTypes
         {
-            get { throw new NotImplementedException(); }
+            get { return supportedMsgs; }
         }
 
-        public async Task<bool> Post<T>(T msg)
+        public async Task<ReceiveResponce> Post<T>(T msg)
         {
-            await this.hubProxy.Invoke("");
+            ReceiveResponce result;
+            
+            if (QuadMsgToHubMethMap.ContainsKey(msg.GetType()))
+            {
+                var hubCall = QuadMsgToHubMethMap[msg.GetType()];
+                result = await this.hubProxy.Invoke<ReceiveResponce>(hubCall, msg).ConfigureAwait(false);
+            }
+            else
+            {
+                result = new ReceiveResponce(false);
+            }
 
-            return true;
+            return result;
         }
 
         public async Task StartClientProxy()
@@ -39,7 +62,15 @@ namespace QuadComms.SignalR.ClientHubProxies
             await this.hub.Start().ConfigureAwait(false);
            
             //Register client proxy methods
+            this.hubProxy.On<MsgResponce>("SendMsgResponceToQuad", async (i) => await this.ProcessMsgresponce().ConfigureAwait(false));
+        }
 
+        private Task ProcessMsgresponce()
+        {
+            return Task.Run(() => 
+            {
+                //Add message to singalR transmit queue.
+            });
         }
     }
 }

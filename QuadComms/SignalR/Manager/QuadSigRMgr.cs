@@ -1,4 +1,5 @@
 ﻿using QuadComms.Interfaces.SignalR;
+using QuadSignalRMsgs.HubResponces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace QuadComms.SignalR.Manager
             this.clientHubProxies = clientHubProxies;
         }
 
-        public async Task<bool> PostToServer<T>(T msg)
+        public async Task<ReceiveResponce> PostToServer<T>(T msg)
         {
             var result = await this.msgToHubMap[typeof(T)].Post<T>(msg).ConfigureAwait(false);
 

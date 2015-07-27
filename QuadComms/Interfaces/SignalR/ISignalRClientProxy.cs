@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QuadSignalRMsgs.HubResponces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace QuadComms.Interfaces.SignalR
     {
         List<Type> SupportedMsgTypes { get; }
 
-        Task<bool> Post<T>(T msg);
+        Task<ReceiveResponce> Post<T>(T msg);
 
         Task StartClientProxy();
 

@@ -74,6 +74,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>packages\QuadModels.1.0.0-CI00028\lib\net40\QuadModels.dll</HintPath>
     </Reference>
+    <Reference Include="QuadSignalRMsgs">
+      <HintPath>packages\QuadSignalRMsgs.1.0.0-CI00001\lib\net40\QuadSignalRMsgs.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
