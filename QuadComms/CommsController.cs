@@ -16,6 +16,7 @@ using QuadComms.Interfaces.MsgProcessor;
 using QuadComms.IoC.Ninject;
 using Ninject;
 using QuadComms.Interfaces.CommsController;
+using QuadComms.Interfaces.SignalR;
 
 namespace QuadComms
 {
@@ -23,6 +24,8 @@ namespace QuadComms
     {
         private ICommsController commChannel;
         private IMsgProcessor msgProcessor;
+        private ISignalRClientProxyMgr signalRMgr;
+
         private NinjectIoC kernel;
 
         private CancellationToken cancelToken;
@@ -38,6 +41,7 @@ namespace QuadComms
 
                         commChannel = this.kernel.Kernel.Get<ICommsController>();
                         msgProcessor = this.kernel.Kernel.Get<IMsgProcessor>();
+                        this.signalRMgr = this.kernel.Kernel.Get<ISignalRClientProxyMgr>();
                         break;
                     }
                     case SupportedChannels.Tcpip:
@@ -55,7 +59,7 @@ namespace QuadComms
         {
             this.commChannel.Setup();
           
-            await Task.WhenAll(commChannel.Start(this.cancelToken), this.msgProcessor.Start());
+            await Task.WhenAll(commChannel.Start(this.cancelToken), this.msgProcessor.Start(), this.signalRMgr.Start()).ConfigureAwait(false);
         }   
     }
 }

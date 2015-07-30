@@ -1,4 +1,7 @@
-﻿using QuadComms.Interfaces.SignalR;
+﻿using Ninject;
+using QuadComms.DataPckControllers.DataPckRecvControllers;
+using QuadComms.Interfaces.Queues;
+using QuadComms.Interfaces.SignalR;
 using QuadSignalRMsgs.HubResponces;
 using System;
 using System.Collections.Generic;
@@ -13,7 +16,9 @@ namespace QuadComms.SignalR.Manager
         private Dictionary<Type, ISignalRClientProxy>  msgToHubMap = new Dictionary<Type, ISignalRClientProxy>();
         private List<ISignalRClientProxy> clientHubProxies;
 
-        public QuadSigRMgr(List<ISignalRClientProxy> clientHubProxies)
+        public QuadSigRMgr(List<ISignalRClientProxy> clientHubProxies,
+            [Named("SigRRecvQueue")]IDataTransferQueue<ISignalRRecvQueueMsg> sigRRecvQueue,
+            [Named("SigRTransQueue")]IDataTransferQueue<ISigRPostQueueMsg<DataPckRecvController>> sigRPostQueue)
         {
             this.clientHubProxies = clientHubProxies;
         }
@@ -25,10 +30,22 @@ namespace QuadComms.SignalR.Manager
             return result;
         }
 
-        public async Task StartClientProxies()
+        public Task Start()
         {
-            //Start all client proxies.
-            await Task.WhenAll(this.clientHubProxies.Select(proxy => proxy.StartClientProxy())).ConfigureAwait(false);
+            return Task.Run(async () =>
+            {
+                 
+                this.RegisterClientMsgTypes();
+
+                //Start all client proxies.
+                await Task.WhenAll(this.clientHubProxies.Select(proxy => proxy.StartClientProxy())).ConfigureAwait(false);
+
+                while (true)
+                {
+                    //Process message requests.
+                }
+            });
+            
         }
 
         private void RegisterClientMsgTypes()

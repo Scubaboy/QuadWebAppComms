@@ -11,6 +11,6 @@ namespace QuadComms.Interfaces.SignalR
     {
         Task<ReceiveResponce> PostToServer<T>(T msg);
 
-        Task StartClientProxies();
+        Task Start();
     }
 }
