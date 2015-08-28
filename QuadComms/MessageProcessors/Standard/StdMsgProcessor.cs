@@ -12,6 +12,7 @@ using QuadComms.DataPckStructs;
 using QuadComms.Interfaces.Breeze;
 using QuadComms.Interfaces.MsgProcessor;
 using QuadComms.Interfaces.Queues;
+using QuadComms.QueuePackets.Post;
 using QuadComms.QueuePackets.SigRPost;
 using QuadModels;
 using System;
@@ -50,7 +51,7 @@ namespace QuadComms.MessageProcessors.Standard
             this.activeQuadRepos = activeQuadRepos;
         }
 
-        public  Task Start()
+        public Task Start()
         {
             return Task.Run(async ()=>{
                 while(true)
@@ -67,11 +68,28 @@ namespace QuadComms.MessageProcessors.Standard
            
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void processSigRRecvMsgs()
         {
-            
+            if (this.sigRRecvQueue.Any())
+            {
+                ISignalRRecvQueueMsg sigRMsg;
+
+                if (this.sigRRecvQueue.Remove(out sigRMsg))
+                {
+                    var sendToQuadMsg = new PostPck(sigRMsg.ResponceForQuad.ResponceForQuad,sigRMsg.ResponceForQuad.QuadId, sigRMsg.ResponceForQuad.AckRequired);
+
+                    this.postQueue.Add(sendToQuadMsg);
+                }
+            }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private async Task<bool> processQuadRecvMsgs()
         {
             var result = true;

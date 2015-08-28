@@ -1,4 +1,4 @@
-﻿using QuadSignalRMsgs.HubResponces;
+﻿using Microsoft.AspNet.SignalR.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace QuadComms.Interfaces.SignalR
 {
-    public interface ISignalRClientProxyMgr
+    public interface IHubProxyFactory
     {
-        Task Start();
+        Task<IHubProxy> Create(string hubUrl, string hub);
     }
 }

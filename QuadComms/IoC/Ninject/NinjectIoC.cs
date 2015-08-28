@@ -15,8 +15,12 @@ using QuadComms.Interfaces.CRCInterface;
 using QuadComms.Interfaces.DataDecoder;
 using QuadComms.Interfaces.MsgProcessor;
 using QuadComms.Interfaces.Queues;
+using QuadComms.Interfaces.SignalR;
 using QuadComms.MessageProcessors.Standard;
 using QuadComms.Queues.QuadConcurrentQueue;
+using QuadComms.SignalR.ClientHubProxies;
+using QuadComms.SignalR.HubFactory;
+using QuadComms.SignalR.Manager;
 using QuadModels;
 using System.IO.Ports;
 
@@ -109,6 +113,17 @@ namespace QuadComms.IoC.Ninject
                 .Bind<IBreezeEntityManagerFactory>()
                 .To<EntityMgrFact>();
 
+            kernel
+                .Bind<ISignalRClientProxyMgr>()
+                .To<QuadSigRMgr>();
+            kernel
+                .Bind<IHubProxyFactory>()
+                .To<HubProxyFactory>()
+                .InSingletonScope();
+            kernel
+                .Bind<BaseMsgHubClientProxy>()
+                .To<MsgHubClientProxy>()
+                .WithConstructorArgument("hubUrl", "http://localhost:8989");
         }
     }
 }

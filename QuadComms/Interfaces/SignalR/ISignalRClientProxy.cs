@@ -1,4 +1,5 @@
-﻿using QuadSignalRMsgs.HubResponces;
+﻿using QuadComms.Interfaces.Queues;
+using QuadSignalRMsgs.HubResponces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,13 @@ namespace QuadComms.Interfaces.SignalR
 
         Task<ReceiveResponce> Post<T>(T msg);
 
+        bool ServerMsgWaiting { get; }
+
+        ISignalRRecvQueueMsg TakePendingMsg();
+
         Task StartClientProxy();
+        void RegisterClientProxyMethods();
+
 
     }
 }

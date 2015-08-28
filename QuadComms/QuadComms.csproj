@@ -75,7 +75,7 @@
       <HintPath>packages\QuadModels.1.0.0-CI00028\lib\net40\QuadModels.dll</HintPath>
     </Reference>
     <Reference Include="QuadSignalRMsgs">
-      <HintPath>packages\QuadSignalRMsgs.1.0.0-CI00001\lib\net40\QuadSignalRMsgs.dll</HintPath>
+      <HintPath>packages\QuadSignalRMsgs.1.0.0-CI00004\lib\net40\QuadSignalRMsgs.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -156,6 +156,7 @@
     <Compile Include="Interfaces\Queues\IQuadRecvMsgQueue.cs" />
     <Compile Include="Interfaces\Queues\ISignalRRecvQueueMsg.cs" />
     <Compile Include="Interfaces\Queues\ISigRPostQueueMsg.cs" />
+    <Compile Include="Interfaces\SignalR\IHubProxyFactory.cs" />
     <Compile Include="Interfaces\SignalR\ISignalRClientProxy.cs" />
     <Compile Include="Interfaces\SignalR\ISignalRClientProxyMgr.cs" />
     <Compile Include="IoC\Ninject\NinjectIoC.cs" />
@@ -165,8 +166,11 @@
     <Compile Include="QueuePackets\QuadRecv\QuadRecvPck.cs" />
     <Compile Include="QueuePackets\SigRPost\SigRPostPck.cs" />
     <Compile Include="Queues\QuadConcurrentQueue\QuadQueue.cs" />
+    <Compile Include="SignalR\ClientHubProxies\BaseMsgHubClientProxy.cs" />
     <Compile Include="SignalR\ClientHubProxies\MsgHubClientProxy.cs" />
+    <Compile Include="SignalR\HubFactory\HubProxyFactory.cs" />
     <Compile Include="SignalR\Manager\QuadSigRMgr.cs" />
+    <Compile Include="SignalR\ServerResponce.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

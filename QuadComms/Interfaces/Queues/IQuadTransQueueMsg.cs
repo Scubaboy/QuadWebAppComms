@@ -10,5 +10,7 @@ namespace QuadComms.Interfaces.Queues
     {
         bool Ackrequired { get; }
         byte[] Data { get; }
+
+        int QuadId { get; }
     }
 }
