@@ -77,17 +77,25 @@ namespace CommsDataProcess.Tests
             commsChannel.ProcessCommsChannel();
 
             //Assert
-            mockCommsDevice.VerifyGet(mock => mock.BytesToRead, Times.Exactly(2));
+            mockCommsDevice.VerifyGet(mock => mock.BytesToRead, Times.Exactly(1));
         }
         [TestMethod]
         public void WhenSynchedProcessesMessagesOfExpectedLength200BytesWithStartEndMarkersCopiesToRecvQueue()
         {
             //Arrange
             var hasBeenCalled = false;
+            var commsIter = 0;
+            var mockedMessage = new byte[200];
             var mockCommsDevice = new Mock<ICommsDevice>();
+
+            mockedMessage[0] = (byte)'<';
+            mockedMessage[1] = (byte)'<';
+            mockedMessage[198] = (byte)'>';
+            mockedMessage[199] = (byte)'>';
+
             mockCommsDevice.SetupSequence(x => x.BytesToRead)
-                .Returns(2)
-                .Returns(200);
+                .Returns(2);
+
             mockCommsDevice.Setup(x => x.Read(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Callback((byte[] buffer, int offset, int count) =>
                 {
@@ -98,20 +106,22 @@ namespace CommsDataProcess.Tests
                         buffer[1] = synchBytes[1];
                         hasBeenCalled = true;
                     }
-                    else
-                    {
-                        buffer[0] = 60;
-                        buffer[1] = 60;
-                        buffer[198] = 62;
-                        buffer[199] = 62;
-                    }
                 });
+
+            mockCommsDevice.Setup(x => x.ReadByte()).Returns(() =>
+            {
+                return mockedMessage[commsIter];
+            });
 
             var commsChannel = new BasicChannel(mockCommsDevice.Object);
 
             //Act
             commsChannel.ProcessCommsChannel();
-            commsChannel.ProcessCommsChannel();
+            while (commsIter < 200)
+            {
+                commsChannel.ProcessCommsChannel();
+                commsIter++;
+            }
 
             //Assert
             Assert.AreEqual(commsChannel.DataPcksAvailable(), true);

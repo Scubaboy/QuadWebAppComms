@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuadCommsTestHost", "..\Qua
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommsDataProcess.Tests", "..\CommsDataProcess.Tests\CommsDataProcess.Tests.csproj", "{118EA070-9BC5-48B4-B2BF-9D5CD90B61C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SigRMsgHubClientProxy.Tests", "..\SigRMsgHubClientProxy.Tests\SigRMsgHubClientProxy.Tests.csproj", "{D36737F6-39D3-439F-A8A5-2E707B11B0A9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SigRClientProxy.Tests", "..\SigRMsgHubClientProxy.Tests\SigRClientProxy.Tests.csproj", "{D36737F6-39D3-439F-A8A5-2E707B11B0A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
