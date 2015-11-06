@@ -72,7 +72,7 @@
     </Reference>
     <Reference Include="QuadModels, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>packages\QuadModels.1.0.0-CI00028\lib\net40\QuadModels.dll</HintPath>
+      <HintPath>packages\QuadModels.1.0.0-CI00029\lib\net40\QuadModels.dll</HintPath>
     </Reference>
     <Reference Include="QuadSignalRMsgs">
       <HintPath>packages\QuadSignalRMsgs.1.0.0-CI00004\lib\net40\QuadSignalRMsgs.dll</HintPath>
@@ -96,6 +96,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Packages\LibLog.4.2\LibLog.cs" />
     <Compile Include="Breeze\EntityManagerFactory\EntityMgrFact.cs" />
     <Compile Include="CommControllers\CommPortConfig.cs" />
     <Compile Include="CommsController.cs" />
@@ -105,6 +106,10 @@
     <Compile Include="CommsDevices\SerialComms\Serial.cs" />
     <Compile Include="CommsProgress\Progress.cs" />
     <Compile Include="CommsProgress\Status\SendReceiveStatus.cs" />
+    <Compile Include="Controllers\AttachedQuadsController\AttachedQuadsctrl.cs" />
+    <Compile Include="Controllers\CommsContStatusController\CommsContStatusCtrl.cs" />
+    <Compile Include="Controllers\QuadStatusController\QuadStatusCtrl.cs" />
+    <Compile Include="Controllers\ProcessControllers\ProcessCtrl.cs" />
     <Compile Include="CRC32Generator\CRC32.cs" />
     <Compile Include="DataPckControllers\DataPckRecvControllers\DataLoggerDataPckController\DataLoggerDataPckController.cs" />
     <Compile Include="DataPckControllers\DataPckRecvControllers\DataPckRecvController.cs" />
@@ -114,9 +119,11 @@
     <Compile Include="DataPckControllers\DataPckRecvControllers\SystemIdDataPckController\SystemIdDataPckController.cs" />
     <Compile Include="DataPckControllers\DataPckTransControllers\ConfigCalDataPckController\ConfigCalDataPckController.cs" />
     <Compile Include="DataPckControllers\DataPckTransControllers\DataLoggerPckController\DataLoggerPckController.cs" />
+    <Compile Include="DataPckControllers\DataPckTransControllers\HeartBeatDataPckController\HeatBeatDataPckCtrl.cs" />
     <Compile Include="DataPckControllers\DataPckTransControllers\ReSendDataPckController\ReSendDataPckController.cs" />
     <Compile Include="DataPckControllers\DataPckTransControllers\SelectedSysConfDataPckController\SelectedSysConfDataPckController.cs" />
     <Compile Include="DataPckControllers\DataPckTransControllers\SystemStatusAckDataPckController\SystemStatusActDataPckController.cs" />
+    <Compile Include="DataPckControllers\DataPckTransControllers\TimeSyncDataPckController\TimeSyncDataPckCtrl.cs" />
     <Compile Include="DataPckControllers\DataPckTransControllers\UserResponcePckController\UserResponcePckController.cs" />
     <Compile Include="DataPckControllers\DataPckTransControllers\DataPckDecoderControllers\Binary\BinaryDecoder.cs" />
     <Compile Include="DataPckControllers\DataPckTransControllers\DataPckDecoderControllers\DecoderTypes\DecodedDataPck.cs" />
@@ -126,12 +133,14 @@
     <Compile Include="DataPcks\DataLoggerDataPck\DataLogger.cs" />
     <Compile Include="DataPcks\DataRequestDataPck\DataRequest.cs" />
     <Compile Include="DataPcks\FlightDataPck\FlightData.cs" />
+    <Compile Include="DataPcks\HeartBeatDataPck\HeartBeatData.cs" />
     <Compile Include="DataPcks\MsgDataPck\MsgData.cs" />
     <Compile Include="DataPcks\RequiredMsgTypeDataPck\RequiredMsgType.cs" />
     <Compile Include="DataPcks\SelectedSysConfDataPck\SelectedSysConfData.cs" />
     <Compile Include="DataPcks\SendConfPck\SendConf.cs" />
     <Compile Include="DataPcks\SystemId\SystemId.cs" />
     <Compile Include="DataPcks\SystemStatusActDataPck\SystemStatusAct.cs" />
+    <Compile Include="DataPcks\TimeSyncDataPck\TimeSyncData.cs" />
     <Compile Include="DataPcks\UserResponceDataPck\UserResponce.cs" />
     <Compile Include="Interfaces\Breeze\IBreezeEntityManagerFactory.cs" />
     <Compile Include="Interfaces\Breeze\IBreezeDataContext.cs" />
@@ -140,6 +149,10 @@
     <Compile Include="Interfaces\CommsController\ICommStatus.cs" />
     <Compile Include="Interfaces\CommsChannel\ICommsChannel.cs" />
     <Compile Include="Interfaces\CommsDevice\ICommsDevice.cs" />
+    <Compile Include="Interfaces\Controllers\AttachedQuadsController\IAttachedQuadsCtrl.cs" />
+    <Compile Include="Interfaces\Controllers\CommsContStatusController\ICommsContStatusCtrl.cs" />
+    <Compile Include="Interfaces\Controllers\QuadStatusController\IQuadStatusCtrl.cs" />
+    <Compile Include="Interfaces\Controllers\ProcessController\IProcessCtrl.cs" />
     <Compile Include="Interfaces\DataDecoder\IDataDecoder.cs" />
     <Compile Include="DataPackerHelpers\ByteSwapper.cs" />
     <Compile Include="DataPckControllers\DataPckTransControllers\ActiveDataPckController\ActiveDataPckController.cs" />
@@ -150,6 +163,8 @@
     <Compile Include="Interfaces\CommsController\ICommsController.cs" />
     <Compile Include="Interfaces\CRCInterface\ICRC.cs" />
     <Compile Include="Interfaces\DataPckTransControllerInterface\IDataPckTransController.cs" />
+    <Compile Include="Interfaces\Logging\ILogConfiguration.cs" />
+    <Compile Include="Interfaces\Logging\ILogger.cs" />
     <Compile Include="Interfaces\MsgProcessor\IMsgProcessor.cs" />
     <Compile Include="Interfaces\Queues\IDataTransferQueue.cs" />
     <Compile Include="Interfaces\Queues\IQuadTransQueueMsg.cs" />
@@ -160,6 +175,8 @@
     <Compile Include="Interfaces\SignalR\ISignalRClientProxy.cs" />
     <Compile Include="Interfaces\SignalR\ISignalRClientProxyMgr.cs" />
     <Compile Include="IoC\Ninject\NinjectIoC.cs" />
+    <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Logging\NLog\NLogConfiguration.cs" />
     <Compile Include="MessageProcessors\Standard\StdMsgProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueuePackets\Post\PostPck.cs" />

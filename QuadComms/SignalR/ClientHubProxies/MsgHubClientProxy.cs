@@ -26,7 +26,7 @@ namespace QuadComms.SignalR.ClientHubProxies
             this.hubUrl = hubUrl;
         }
 
-        public List<Type> SupportedMsgTypes
+        public override List<Type> SupportedMsgTypes
         {
             get { return supportedMsgs; }
         }

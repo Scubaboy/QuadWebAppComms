@@ -20,7 +20,9 @@ using QuadComms.DataPckStructs;
 using QuadComms.Interfaces.CommsChannel;
 using QuadComms.Interfaces.CommsController;
 using QuadComms.Interfaces.CommsDevice;
+using QuadComms.Interfaces.Controllers.AttachedQuadsController;
 using QuadComms.Interfaces.DataDecoder;
+using QuadComms.Interfaces.Logging;
 using QuadComms.Interfaces.Queues;
 using QuadComms.QueuePackets.QuadRecv;
 using System;
@@ -45,7 +47,7 @@ namespace QuadComms.CommControllers
         private const int RetryThreshold = 10;
         private const int SendRecvTaskSleep =   1;
         private const int ProgressUpdatePeriod = 5;
-        private const int SendPeriod = 3000;
+        private const int SendPeriod = 1000;
         private const int TicksBetweenProgreeUpdates = ProgressUpdatePeriod/SendRecvTaskSleep;
         private const int TicksBetweenSends = SendPeriod/SendRecvTaskSleep;
         private const string StartMarker = "<<";
@@ -58,15 +60,17 @@ namespace QuadComms.CommControllers
         private ICommsChannel commsChannel;
         IDataTransferQueue<IQuadRecvMsgQueue> recvQueue;
         IDataTransferQueue<IQuadTransQueueMsg> postQueue;
-        
+        private ILogger localLogger;
         private int sendTicks;
         private int failedSendsLastProgress;
-
+        private IAttachedQuadsCtrl attachedQuads;
 
 
         public CommController(
-            ICommsChannel commsChannel,
+           ICommsChannel commsChannel,
             IDataDecoder dataPckDecoder,
+            ILogger localLogger,
+            IAttachedQuadsCtrl attachedQuads,
             [Named("QuadRecvQueue")]IDataTransferQueue<IQuadRecvMsgQueue> recvQueue,
             [Named("QuadTransQueue")]IDataTransferQueue<IQuadTransQueueMsg> postQueue)
         {
@@ -74,6 +78,8 @@ namespace QuadComms.CommControllers
             this.commsChannel = commsChannel;
             this.recvQueue = recvQueue;
             this.postQueue = postQueue;
+            this.localLogger = localLogger;
+            this.attachedQuads = attachedQuads;
         }
 
         public void Setup()
@@ -89,17 +95,17 @@ namespace QuadComms.CommControllers
         {
             return Task.Run(() =>
                 {
-                    this.commsChannel.ClearInput();
+                    //this.commsChannel.ClearInput();
                     while (!cancellationToken.IsCancellationRequested)
                     {
-                        this.commsChannel.ProcessCommsChannel();
+                       // this.commsChannel.ProcessCommsChannel();
                         this.ReceiveDataPckAction();
                         this.TransmitAction();
-                      
+                        this.attachedQuads.Update();
                         Thread.Sleep(SendRecvTaskSleep);
                     }
 
-                    this.commsChannel.Close();
+                   // this.commsChannel.Close();
                 });
         }
 
@@ -199,7 +205,7 @@ namespace QuadComms.CommControllers
             var blocksSent = 0;
             var blockOffset = 0;
 
-            Debug.WriteLine("Send msg type {0}", BitConverter.ToUInt32(dataPckToSend, 4));
+            this.localLogger.Info(string.Format("Send msg type {0}", BitConverter.ToUInt32(dataPckToSend, 4)));
             this.commsChannel.QueueDataPck(dataPckToSend); 
         }
     }

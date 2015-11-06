@@ -1,15 +1,19 @@
 ﻿using Ninject;
+using QuadComms.CRC32Generator;
 using QuadComms.DataPckControllers.DataPckRecvControllers;
 using QuadComms.DataPckControllers.DataPckRecvControllers.FlightDataDataPckController;
 using QuadComms.DataPckControllers.DataPckRecvControllers.MsgDataPckController;
 using QuadComms.DataPckControllers.DataPckRecvControllers.SystemIdDataPckController;
+using QuadComms.DataPckControllers.DataPckTransControllers.TimeSyncDataPckController;
 using QuadComms.DataPckDecoderControllers.DecoderTypes;
 using QuadComms.DataPcks;
 using QuadComms.DataPcks.FlightDataPck;
+using QuadComms.DataPcks.HeartBeatDataPck;
 using QuadComms.DataPcks.MsgDataPck;
 using QuadComms.DataPcks.SystemId;
 using QuadComms.DataPckStructs;
 using QuadComms.Interfaces.Breeze;
+using QuadComms.Interfaces.Controllers.AttachedQuadsController;
 using QuadComms.Interfaces.MsgProcessor;
 using QuadComms.Interfaces.Queues;
 using QuadComms.QueuePackets.Post;
@@ -34,7 +38,7 @@ namespace QuadComms.MessageProcessors.Standard
         private IDataTransferQueue<ISigRPostQueueMsg<DataPckRecvController>> sigRPostQueue;
         private UInt32 lastMsgCRC = 0;
         private IBreezeRepository<ActiveQuad> activeQuadRepos;
-
+        private IAttachedQuadsCtrl attachedQuads;
         private const int MsgProcessTaskSleep = 500;
 
         public StdMsgProcessor(
@@ -42,22 +46,25 @@ namespace QuadComms.MessageProcessors.Standard
             [Named("SigRRecvQueue")]IDataTransferQueue<ISignalRRecvQueueMsg> sigRRecvQueue,
             [Named("SigRTransQueue")]IDataTransferQueue<ISigRPostQueueMsg<DataPckRecvController>> sigRPostQueue,
             [Named("QuadTransQueue")]IDataTransferQueue<IQuadTransQueueMsg> postQueue,
-            IBreezeRepository<ActiveQuad> activeQuadRepos)
+            IBreezeRepository<ActiveQuad> activeQuadRepos,
+            IAttachedQuadsCtrl attachedQuads)
         {
             this.postQueue = postQueue;
             this.quadRecvQueue = quadRecvQueue;
             this.sigRRecvQueue = sigRRecvQueue;
             this.sigRPostQueue = sigRPostQueue;
             this.activeQuadRepos = activeQuadRepos;
+            this.attachedQuads = attachedQuads;
         }
 
         public Task Start()
         {
-            return Task.Run(async ()=>{
+            return Task.Run( ()=>
+            {
                 while(true)
                 {
                     //Process quad received messages
-                    await this.processQuadRecvMsgs().ConfigureAwait(false);
+                    this.processQuadRecvMsgs();//.ConfigureAwait(false);
 
                     //Process sigR recived messages
                     this.processSigRRecvMsgs();
@@ -90,7 +97,7 @@ namespace QuadComms.MessageProcessors.Standard
         /// 
         /// </summary>
         /// <returns></returns>
-        private async Task<bool> processQuadRecvMsgs()
+        private bool processQuadRecvMsgs()
         {
             var result = true;
 
@@ -100,7 +107,7 @@ namespace QuadComms.MessageProcessors.Standard
 
                 if (this.quadRecvQueue.Remove(out nextMsg))
                 {
-                    if (this.lastMsgCRC != nextMsg.CRC)
+                    if (this.lastMsgCRC != nextMsg.CRC || nextMsg.Msg.Type == DataPckTypes.DataPcks.HeartBeat)
                     {
                         //Have a new msg not just a repeat of the last one.
                         this.lastMsgCRC = nextMsg.CRC;
@@ -144,7 +151,8 @@ namespace QuadComms.MessageProcessors.Standard
                                     //post to database
                                     var newQuad = (SystemId)nextMsg.Msg;
 
-                                    this.activeQuadRepos.Add(new ActiveQuad(-1) 
+                                    this.attachedQuads.AddQuad(newQuad.quadID);
+                                    /*this.activeQuadRepos.Add(new ActiveQuad(-1) 
                                     {
                                         InUse = false,
                                         QuadId = newQuad.quadID.ToString(),
@@ -162,13 +170,28 @@ namespace QuadComms.MessageProcessors.Standard
                                        {
                                            CRCStatus = DecodeStatus.Complete
                                        }));
+                                    */
 
+                                    this.postQueue.Add(
+                                        new PostPck(
+                                            new TimeSyncDataPckCtrl((UInt32)DateTime.Now.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
+                                            {
+                                                CrcController = new CRC32()
+                                            }.GetByteArray(),
+                                            (int)newQuad.quadID,
+                                            true));
                                     break;
                                 }
                             case DataPckTypes.DataPcks.DataLogger:
                                 {
                                     //post to database
                                
+                                    break;
+                                }
+                            case DataPckTypes.DataPcks.HeartBeat:
+                                {
+                                    var heartBeat = (HeartBeatData)nextMsg.Msg;
+                                    this.attachedQuads.UpdateReceivedQuadHeartBeat(heartBeat.quadID);
                                     break;
                                 }
                             default:

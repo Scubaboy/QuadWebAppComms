@@ -62,7 +62,14 @@ namespace QuadComms.CommsDevices.SerialComms
 
         public int ReadByte()
         {
-            return this.serialPort.ReadByte();
+            if (this.serialPort.BytesToRead > 0)
+            {
+                return this.serialPort.ReadByte();
+            }
+            else
+            {
+                return -1;
+            }
         }
     }
 }

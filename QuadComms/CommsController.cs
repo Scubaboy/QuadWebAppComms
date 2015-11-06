@@ -25,9 +25,7 @@ namespace QuadComms
         private ICommsController commChannel;
         private IMsgProcessor msgProcessor;
         private ISignalRClientProxyMgr signalRMgr;
-
-        private NinjectIoC kernel;
-
+        private ICommsChannel commsChannel;
         private CancellationToken cancelToken;
 
         public CommsController( SupportedChannels channel)
@@ -36,12 +34,12 @@ namespace QuadComms
             {
                 case SupportedChannels.Comm:
                     {
-                        this.kernel = new NinjectIoC();
-                       
 
-                        commChannel = this.kernel.Kernel.Get<ICommsController>();
-                        msgProcessor = this.kernel.Kernel.Get<IMsgProcessor>();
-                        this.signalRMgr = this.kernel.Kernel.Get<ISignalRClientProxyMgr>();
+
+                        commsChannel = NinjectIoC.Kernel.Get<ICommsChannel>();
+                        commChannel = NinjectIoC.Kernel.Get<ICommsController>();
+                        msgProcessor = NinjectIoC.Kernel.Get<IMsgProcessor>();
+                        this.signalRMgr = NinjectIoC.Kernel.Get<ISignalRClientProxyMgr>();
                         break;
                     }
                     case SupportedChannels.Tcpip:
@@ -58,8 +56,8 @@ namespace QuadComms
         public async Task CommsControllerAsync()
         {
             this.commChannel.Setup();
-          
-            await Task.WhenAll(commChannel.Start(this.cancelToken), this.msgProcessor.Start(), this.signalRMgr.Start()).ConfigureAwait(false);
+
+            await Task.WhenAll(commChannel.Start(this.cancelToken),commsChannel.Start(this.cancelToken), this.msgProcessor.Start());//, this.signalRMgr.Start()).ConfigureAwait(false);
         }   
     }
 }

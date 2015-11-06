@@ -38,6 +38,7 @@
     <Reference Include="Microsoft.AspNet.SignalR.Client">
       <HintPath>..\QuadComms\packages\Microsoft.AspNet.SignalR.Client.2.2.0\lib\net45\Microsoft.AspNet.SignalR.Client.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Moq">
       <HintPath>..\QuadComms\packages\Moq.4.2.1502.0911\lib\net40\Moq.dll</HintPath>
     </Reference>
@@ -63,7 +64,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="MsgHubClientProxyTests.cs" />
+    <Compile Include="App_Packages\LibLog.4.2\LibLog.cs" />
+    <Compile Include="ClientProxyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

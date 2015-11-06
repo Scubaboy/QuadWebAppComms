@@ -13,6 +13,7 @@ using QuadComms.DataPcks.MsgDataPck;
 using QuadComms.DataPcks.RequiredMsgTypeDataPck;
 using QuadComms.DataPcks.SendConfPck;
 using QuadComms.DataPcks.SystemId;
+using QuadComms.DataPcks.HeartBeatDataPck;
 
 namespace QuadComms.DataPckDecoderControllers.Helpers
 {
@@ -73,6 +74,11 @@ namespace QuadComms.DataPckDecoderControllers.Helpers
                     case DataPckTypes.DataPcks.RequestData:
                     {
                         dataPck = (DataRequest)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(DataRequest));
+                        break;
+                    }
+                case DataPckTypes.DataPcks.HeartBeat:
+                    {
+                        dataPck = (HeartBeatData)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(HeartBeatData));
                         break;
                     }
                 default:

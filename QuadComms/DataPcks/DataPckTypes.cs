@@ -63,7 +63,9 @@ namespace QuadComms.DataPckStructs
             DataLogger = 23,
             RequiredMsgType = 24,
             FreeTxtMsg = 25,
-            SelectedSysConfMsg = 26
+            SelectedSysConfMsg = 26,
+            HeartBeat = 30,
+            SyncTime = 31
 
         };
 

@@ -17,9 +17,9 @@ namespace QuadComms.SignalR.ClientHubProxies
         protected IHubProxy hubProxy;
         protected  ConcurrentQueue<Responce> internalResponceQueue = new ConcurrentQueue<Responce>();
 
-        public List<Type> SupportedMsgTypes
+        public abstract List<Type> SupportedMsgTypes
         {
-            get { throw new NotImplementedException(); }
+            get;
         }
 
         public async Task<ReceiveResponce> Post<T>(T msg)

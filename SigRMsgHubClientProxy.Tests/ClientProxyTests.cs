@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace SigRMsgHubClientProxy.Tests
 {
     [TestClass]
-    public class MsgHubClientProxyTests
+    public class ClientProxyTests
     {
         [TestMethod]
         public async Task OnlyPostSupportedMsgDataPckControllerReturnsResponceTrue()

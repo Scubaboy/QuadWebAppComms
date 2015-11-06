@@ -4,6 +4,10 @@ using QuadComms.Breeze.Repositories.ActiveQuadRepository;
 using QuadComms.CommControllers;
 using QuadComms.CommsChannels;
 using QuadComms.CommsDevices.SerialComms;
+using QuadComms.Controllers.AttachedQuadsController;
+using QuadComms.Controllers.CommsContStatusController;
+using QuadComms.Controllers.ProcessControllers;
+using QuadComms.Controllers.QuadStatusController;
 using QuadComms.CRC32Generator;
 using QuadComms.DataPckControllers.DataPckRecvControllers;
 using QuadComms.DataPckDecoderControllers.Binary;
@@ -11,11 +15,18 @@ using QuadComms.Interfaces.Breeze;
 using QuadComms.Interfaces.CommsChannel;
 using QuadComms.Interfaces.CommsController;
 using QuadComms.Interfaces.CommsDevice;
+using QuadComms.Interfaces.Controllers.AttachedQuadsController;
+using QuadComms.Interfaces.Controllers.CommsContStatusController;
+using QuadComms.Interfaces.Controllers.ProcessController;
+using QuadComms.Interfaces.Controllers.QuadStatusController;
 using QuadComms.Interfaces.CRCInterface;
 using QuadComms.Interfaces.DataDecoder;
+using QuadComms.Interfaces.Logging;
 using QuadComms.Interfaces.MsgProcessor;
 using QuadComms.Interfaces.Queues;
 using QuadComms.Interfaces.SignalR;
+using QuadComms.Logging;
+using QuadComms.Logging.NLog;
 using QuadComms.MessageProcessors.Standard;
 using QuadComms.Queues.QuadConcurrentQueue;
 using QuadComms.SignalR.ClientHubProxies;
@@ -26,17 +37,17 @@ using System.IO.Ports;
 
 namespace QuadComms.IoC.Ninject
 {
-    public class NinjectIoC
+    public static class NinjectIoC
     {
-        private  IKernel kernel;
+        private static IKernel kernel;
 
-        public NinjectIoC()
+        static NinjectIoC()
         {
 
             BuildKernel();
         }
 
-        public IKernel Kernel
+        public static IKernel Kernel
         {
             get
             {
@@ -44,9 +55,34 @@ namespace QuadComms.IoC.Ninject
             }
         }
 
-        public void BuildKernel()
+        public static void BuildKernel()
         {
             kernel = new StandardKernel();
+
+            kernel.Bind<IProcessCtrl>()
+                .To<ProcessCtrl>()
+                .InSingletonScope();
+
+            kernel.Bind<IQuadStatusCtrl>()
+                .To<QuadStatusCtrl>();
+
+            kernel.Bind<IAttachedQuadsCtrl>()
+                .To<AttachedQuadsctrl>()
+                .InSingletonScope();
+                
+            kernel.Bind<ICommsContStatusCtrl>()
+                .To<CommsContStatusCtrl>()
+                .InSingletonScope();
+
+            kernel
+                .Bind<ILogger>()
+                .To<TheLogger>()
+                .InSingletonScope();
+
+            kernel
+                .Bind<ILogConfiguration>()
+                .To<NLogConfiguration>()
+                .InSingletonScope();
 
             kernel
                 .Bind<IDataTransferQueue<IQuadRecvMsgQueue>>()
@@ -82,7 +118,8 @@ namespace QuadComms.IoC.Ninject
 
             kernel
                 .Bind<ICommsChannel>()
-                .To<BasicChannel>();
+                .To<BasicChannel>()
+                .InSingletonScope();
 
             kernel
                 .Bind<ICRC>()
