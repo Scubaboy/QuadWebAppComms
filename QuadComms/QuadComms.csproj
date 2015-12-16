@@ -111,24 +111,24 @@
     <Compile Include="Controllers\QuadStatusController\QuadStatusCtrl.cs" />
     <Compile Include="Controllers\ProcessControllers\ProcessCtrl.cs" />
     <Compile Include="CRC32Generator\CRC32.cs" />
-    <Compile Include="DataPckControllers\DataPckRecvControllers\DataLoggerDataPckController\DataLoggerDataPckController.cs" />
-    <Compile Include="DataPckControllers\DataPckRecvControllers\DataPckRecvController.cs" />
-    <Compile Include="DataPckControllers\DataPckRecvControllers\DataRequestDataPckController\DataRequestDataPckController.cs" />
-    <Compile Include="DataPckControllers\DataPckRecvControllers\FlightDataDataPckController\FlightDataDataPckController.cs" />
-    <Compile Include="DataPckControllers\DataPckRecvControllers\MsgDataPckController\MsgDataPckController.cs" />
-    <Compile Include="DataPckControllers\DataPckRecvControllers\SystemIdDataPckController\SystemIdDataPckController.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\ConfigCalDataPckController\ConfigCalDataPckController.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\DataLoggerPckController\DataLoggerPckController.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\HeartBeatDataPckController\HeatBeatDataPckCtrl.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\ReSendDataPckController\ReSendDataPckController.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\SelectedSysConfDataPckController\SelectedSysConfDataPckController.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\SystemStatusAckDataPckController\SystemStatusActDataPckController.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\TimeSyncDataPckController\TimeSyncDataPckCtrl.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\UserResponcePckController\UserResponcePckController.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\DataPckDecoderControllers\Binary\BinaryDecoder.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\DataPckDecoderControllers\DecoderTypes\DecodedDataPck.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\DataPckDecoderControllers\Helpers\DataPckDecoderHelper.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\DataPckDecoderControllers\Helpers\DataPckStringHelpers.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckRecvControllers\DataLoggerDataPckController\DataLoggerDataPckController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckRecvControllers\DataPckRecvController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckRecvControllers\DataRequestDataPckController\DataRequestDataPckController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckRecvControllers\FlightDataDataPckController\FlightDataDataPckController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckRecvControllers\MsgDataPckController\MsgDataPckController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckRecvControllers\SystemIdDataPckController\SystemIdDataPckController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\ConfigCalDataPckController\ConfigCalDataPckController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\DataLoggerPckController\DataLoggerPckController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\HeartBeatDataPckController\HeatBeatDataPckCtrl.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\ReSendDataPckController\ReSendDataPckController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\SelectedSysConfDataPckController\SelectedSysConfDataPckController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\SystemStatusAckDataPckController\SystemStatusActDataPckController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\TimeSyncDataPckController\TimeSyncDataPckCtrl.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\UserResponcePckController\UserResponcePckController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\DataPckDecoderControllers\Binary\BinaryDecoder.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\DataPckDecoderControllers\DecoderTypes\DecodedDataPck.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\DataPckDecoderControllers\Helpers\DataPckDecoderHelper.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\DataPckDecoderControllers\Helpers\DataPckStringHelpers.cs" />
     <Compile Include="DataPcks\ConfigCalDataPck\ConfigCal.cs" />
     <Compile Include="DataPcks\DataLoggerDataPck\DataLogger.cs" />
     <Compile Include="DataPcks\DataRequestDataPck\DataRequest.cs" />
@@ -155,8 +155,8 @@
     <Compile Include="Interfaces\Controllers\ProcessController\IProcessCtrl.cs" />
     <Compile Include="Interfaces\DataDecoder\IDataDecoder.cs" />
     <Compile Include="DataPackerHelpers\ByteSwapper.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\ActiveDataPckController\ActiveDataPckController.cs" />
-    <Compile Include="DataPckControllers\DataPckTransControllers\DataPckTransController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\ActiveDataPckController\ActiveDataPckController.cs" />
+    <Compile Include="CRC32Generator\DataPckControllers\DataPckTransControllers\DataPckTransController.cs" />
     <Compile Include="DataPcks\ActivateDataPck\Activate.cs" />
     <Compile Include="DataPcks\DataPck.cs" />
     <Compile Include="DataPcks\DataPckTypes.cs" />
@@ -191,7 +191,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="DataPckControllers\DataPcks.cd" />
+    <None Include="CRC32Generator\DataPckControllers\DataPcks.cd" />
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

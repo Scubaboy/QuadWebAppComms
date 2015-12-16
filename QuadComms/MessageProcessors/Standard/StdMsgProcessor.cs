@@ -7,6 +7,7 @@ using QuadComms.DataPckControllers.DataPckRecvControllers.SystemIdDataPckControl
 using QuadComms.DataPckControllers.DataPckTransControllers.TimeSyncDataPckController;
 using QuadComms.DataPckDecoderControllers.DecoderTypes;
 using QuadComms.DataPcks;
+using QuadComms.DataPcks.DataLoggerDataPck;
 using QuadComms.DataPcks.FlightDataPck;
 using QuadComms.DataPcks.HeartBeatDataPck;
 using QuadComms.DataPcks.MsgDataPck;
@@ -14,6 +15,7 @@ using QuadComms.DataPcks.SystemId;
 using QuadComms.DataPckStructs;
 using QuadComms.Interfaces.Breeze;
 using QuadComms.Interfaces.Controllers.AttachedQuadsController;
+using QuadComms.Interfaces.Logging;
 using QuadComms.Interfaces.MsgProcessor;
 using QuadComms.Interfaces.Queues;
 using QuadComms.QueuePackets.Post;
@@ -40,12 +42,14 @@ namespace QuadComms.MessageProcessors.Standard
         private IBreezeRepository<ActiveQuad> activeQuadRepos;
         private IAttachedQuadsCtrl attachedQuads;
         private const int MsgProcessTaskSleep = 500;
+        private ILogger localLogger;
 
         public StdMsgProcessor(
             [Named("QuadRecvQueue")]IDataTransferQueue<IQuadRecvMsgQueue> quadRecvQueue,
             [Named("SigRRecvQueue")]IDataTransferQueue<ISignalRRecvQueueMsg> sigRRecvQueue,
             [Named("SigRTransQueue")]IDataTransferQueue<ISigRPostQueueMsg<DataPckRecvController>> sigRPostQueue,
             [Named("QuadTransQueue")]IDataTransferQueue<IQuadTransQueueMsg> postQueue,
+            ILogger localLogger,
             IBreezeRepository<ActiveQuad> activeQuadRepos,
             IAttachedQuadsCtrl attachedQuads)
         {
@@ -55,6 +59,7 @@ namespace QuadComms.MessageProcessors.Standard
             this.sigRPostQueue = sigRPostQueue;
             this.activeQuadRepos = activeQuadRepos;
             this.attachedQuads = attachedQuads;
+            this.localLogger = localLogger;
         }
 
         public Task Start()
@@ -185,7 +190,8 @@ namespace QuadComms.MessageProcessors.Standard
                             case DataPckTypes.DataPcks.DataLogger:
                                 {
                                     //post to database
-                               
+                                    var dataLogger = (DataLogger)nextMsg.Msg;
+                                    this.localLogger.Debug(Encoding.UTF8.GetString(dataLogger.Msg));
                                     break;
                                 }
                             case DataPckTypes.DataPcks.HeartBeat:
